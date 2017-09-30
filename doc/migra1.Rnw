@@ -1,0 +1,3075 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{ms}
+\usepackage{double_spaced}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{longtable}
+\usepackage{lineno}
+
+\DeclareMathOperator{\chop}{chop}
+\DeclareMathOperator{\cf}{C}
+\DeclareMathOperator{\gammaf}{\gamma}
+\DeclareMathOperator{\gf}{g}
+\DeclareMathOperator{\Gf}{G}
+\DeclareMathOperator{\Mf}{M}
+\DeclareMathOperator{\mf}{m}
+\DeclareMathOperator{\ff}{V}
+\DeclareMathOperator{\Wf}{E}
+\DeclareMathOperator{\Uf}{U}
+\DeclareMathOperator{\Af}{A}
+\DeclareMathOperator{\df}{d}
+
+\newcommand{\Expect}[1]{\ensuremath{\mathsf{E}\left\{#1\right\}}}
+
+\newcommand{\FigL}[1]{\paragraph{Figure~\ref{#1}}}
+
+\title{Optimal moult strategies in migratory birds}
+\setlength{\LTcapwidth}{\textwidth}
+
+% \renewcommand{\co}[3][]{\margo{#1} %
+%   \textcolor{blue}{#3}}
+
+\begin{document}
+\linenumbers
+\bibliographystyle{/home/mazb/lib/texinputs/AmNat}
+\SweaveOpts{echo=FALSE,results=hide,pdf=FALSE}
+
+\setkeys{Gin}{width=\textwidth,keepaspectratio}
+
+%\maketitle
+
+\newcommand{\susc}[1]{%
+\textsuperscript{#1}%
+}
+
+\begin{center}
+  \Huge Optimal moult strategies in migratory birds\\[1in]
+
+  \large Zolt\'an Barta\susc{1,2,3}, John M. McNamara\susc{2}, Alasdair
+  I. Houston\susc{3}, Thomas P. Weber\susc{4}, Anders Hedenstr\"om\susc{5},
+  and Orsolya Fer\'o\susc{1}
+\end{center}
+
+\vspace{1in}
+
+\noindent\susc{1}: Behavioural Ecology Research Group, Department of
+Evolutionary Zoology, University of Debrecen, Debrecen, Egyetem t\'er
+1., 4032, Hungary. Email: zbarta@delfin.unideb.hu
+
+\noindent\susc{2}: Department of Mathematics, University of Bristol, University
+Walk, Bristol, BS8 1TW, UK.
+
+\noindent\susc{3}: School of Biological Sciences, University of
+Bristol, Woodland 
+Road, Bristol, BS8 1UG, UK.
+
+\noindent\susc{4}: Animal Ecology, Department of Ecology, Lund
+University, Lund, Sweden. 
+
+\noindent\susc{5}: Department of Theoretical Ecology, Lund University, Ecology
+Building,  223 62 Lund , Sweden. 
+
+
+\newpage
+
+
+\section*{Abstract}
+\label{sec:abstract}
+
+
+Avian migration, which involves billions of birds flying vast
+distances, is known to influence all aspects of avian life. Here we
+investigate how birds fit moult into an annual cycle determined by the
+need to migrate.  Large variation exists in moulting patterns in
+relation to migration: For instance, moult can occur after breeding in
+the summer or after arrival in the wintering quarters. Here we use an
+optimal annual routine model to investigate why this variation
+exists. The modelled bird's decisions depend on the time of year, its
+energy reserves, breeding status, experience, flight feather quality
+and location. Our results suggest that the temporal and spatial
+variation in food is an important influence on a migratory birds'
+annual cycle.  Summer moult occurs when food has a high peak on the
+breeding site in the summer but it is less seasonal elsewhere. Winter
+moult occurs if there is a short period of high food availability in
+summer and a strong winter peak at different locations (i.e. the food
+is very seasonal but in opposite phase on these areas). This finding
+might explain why only long-distance migrants have a winter moult.
+
+
+
+\vspace{0.5in}
+
+\noindent\emph{Keywords}: optimal annual routines, moult, migration,
+birds, state-dependent dynamic models, dynamic programing, life
+history evolution
+
+\vspace{0.5in}
+
+\noindent{}Short title: \textit{Optimal moult-migration strategies}
+
+\newpage
+
+\section{Introduction}
+\label{sec:introduction}
+
+Migration can be defined as a large scale, seasonal and bidirectional
+movement of animals \citep{adriaensen90:popul_europ}.  Groups that are
+highly migratory include insects, fishes, whales, shorebirds, and
+songbirds \citep{dingle96:migrat}. Birds are especially preadapted for
+migratory life because of their efficient mean of locomotion,
+ powered flight \citep{alerstam91:bird_mig,alexander98:mig}.
+Animals usually migrate to track resources that are unequally
+distributed in space and time \citep{aidley81:mig}. In other words,
+migration can be seen as an adaptation to deal with a high degree of
+environmental seasonality. In birds this usually involves the
+movements between a breeding site and another location (or locations)
+where they spend the rest of the year \citep{greenberg05:mig_book}.
+
+Avian migration is a fascinating event involving billions of birds
+flying vast distances, and considerable modelling efforts have been
+spent in recent years in an attempt to understand it. Early
+optimisation models focused on isolated aspects of avian
+migration. Researchers first used the theory of bird flight
+\citep{pennycuick75:mechan,pennycuick89:bird_flight} to understand the
+relationship between migratory flight and energetics
+\citep{alerstam90:mig_book,alerstam90:opt_mig,alerstam91:bird_mig}.
+For instance, with the theory of flight it is possible to predict the
+flight speeds which are optimal according to different criteria
+(minimising the time, or the energy requirement of migration). This
+approach has also been used to predict the optimal fuel deposition
+rules for migratory birds at stopover sites and so the fat load of
+departing birds \citep{alerstam91:bird_mig}.  Despite their success in
+predicting speed and fat load \citep{alerstam91:bird_mig,
+  houston98:migra}, these models are, however, unable to tell us
+whether a bird should migrate or not, where it should fly to and when
+it should start.  These models also do not allow us to investigate the
+effects of stochasticity, for instance, in foraging and flight
+conditions (e.g.\ wind speed and direction) on migratory behaviour.
+
+If one considers only a single journey, most of the above problems can
+be handled by the now-standard technique of dynamic programing
+\citep{houston88:SDP,houston99:model,clark00:book}. For instance, in
+the case of spring migration, \citet{weber98:optim} and
+\citet{clark99:mig_fitness} were able to investigate how stochasticity
+in wind and foraging conditions influence migratory fuelling. They
+also identified several circumstances when site skipping (passing over
+some of the stopover sites without landing) can occur along the
+migratory path.  While these models are well suited to study the fine
+details of the behaviour of one individual over its journey, they are
+unable to address more general questions. Their limitations come from
+two sources: they consider (i) a single individual on (ii) a single
+journey.
+
+
+Considering just a single individual is problematic if the focal
+individual's behaviour is influenced by others in the population. For
+instance, to determine the optimal arrival time on the breeding ground
+one should not only consider the focal bird's state and the
+environmental conditions on the breeding ground but also the behaviour
+of other members of the population. This is because the density of
+birds already on the breeding area can influence the reproductive
+value of individuals on arrival; consider for instance, the
+competition for limited territories \citep{kokko99:compet}. Therefore,
+a game theoretical approach is needed and the resulting optimal
+behaviour will in effect be an evolutionarily stable strategy
+\citep[ESS,][]{maynardsmith82:game_book,kokko99:compet}.
+
+In avian migration research, we cannot avoid considering the behaviour
+of several individuals simultaneously in at least two other cases: (1)
+partial and (2) differential migration.  In partial migration only one
+part of the population migrates from the breeding site while
+the other part remains resident there
+\citep[e.g.][]{berthold84:part_mig,adriaensen90:popul_europ}.  If we,
+reasonably, assume that increasing density of birds on the breeding
+site during winter decreases the overwinter survival of
+residents then the behaviour of migrants clearly influences the
+reproductive value of residents and vice verse.  The question arises:
+who will stay and who will migrate?  A possible answer is that a mixed
+evolutionarily stable strategy \citep{maynardsmith82:game_book,
+  kaitala93:part_mig} exists where both tactics have the same rewards
+and the behaviour is randomly decided. However, field studies show
+that residents usually do better in terms of fitness than migrants in
+the same population
+\citep[e.g.][]{berthold84:part_mig,adriaensen90:popul_europ}. This
+might indicate that migrants are making the best of a bad job
+\citep{adriaensen90:popul_europ}, i.e.\ the individuals follow a
+unique but conditional strategy and the decision about migration
+depends on the state of the individuals (e.g.\ energy reserves or
+immune condition). This indicates the necessity of a state-dependent
+game theoretical approach to model partial migration realistically.
+
+Differential migration is similar to partial migration in that
+individuals of the same population follow different migratory
+strategies. An apparent difference, however, is that under
+differential migration individuals of well-defined classes (e.g.\ sex
+or age) migrate differently (but this might only relate to the fact
+that currently we are only able to recognise differential migration in
+cases where the classes are different in some clearly observable
+respects). For instance, in their classic study
+\citet{ketterson76:geogr_var,ketterson79:season_dark_juncos} reported
+that in dark eyed juncos \textit{Junco hyemalis hyemalis} the
+females migrate further south than males do. To understand this
+phenomenon one must consider the behaviour of males and females
+simultaneously on a range of locations.
+
+The other problem of the single bird/single journey models stems from
+the fact that an individual's state and behaviour at a given time of
+year and location can significantly influence its behaviour at another
+time of year and location. For instance, \citet{mara98:link} found
+that the quality of winter habitats occupied by American redstarts
+\textit{Setophaga ruticilla} determines their condition and spring
+departure dates, which in turn influence arrival schedules and
+condition in the breeding season, and so possibly affect the birds'
+reproductive success. That is, wintering behaviour and state affect
+migration and breeding, which in turn can influence the behaviour and
+state in the next winter. Consequently to fully understand migration
+one needs to consider the whole annual cycle. These carry over
+or `knock on' effects are the strongest under seasonal
+environments \citep{fretwell72:season}, the environments to which
+migration seems to be an adaptation.
+
+In seasonal environments the timing of actions may considerably affect
+an organism's chances of survival and reproduction. It can thus be
+expected that the order and timing of behaviours will be shaped by
+natural selection so that fitness is maximised. The proper timing of
+behaviours in the annual cycle is important for a number of reasons.
+First, the benefits from the different behaviours can vary notably
+over the year \citep[e.g.][]{masman88:energ_kestr}. Second, as we
+have seen above, performing a certain action may significantly
+influence the animal's future state, which in turn may affect the
+animal's ability to perform other behaviours in the future. Third, a
+number of behaviours are clearly exclusive. In birds, migration and
+reproduction cannot be performed at the same time. The optimal timing
+of a behaviour will therefore not only be dependent on the best time
+for this action but also on whether there are other good times to
+perform the excluded activities.  \citet{houston99:model} present a
+general technique for finding state-dependent optimal annual routines
+which allows the unified handling of game theoretical considerations
+and `knock on' effects.  \citet{barta06:moult} apply the technique to
+find the optimal annual routine of reproduction and moult in
+non-migratory birds. Here we extend their analysis to include
+migration.
+
+\citet{holmgren95:sched} have previously tackled the problem of the
+optimal timing of moult in migratory birds using dynamic programming.
+One main finding of their analysis was that birds should replace their
+feathers before the activity that benefits the most from fresh
+feathers. However, they had to make some restricting assumptions, such
+as a fixed time of breeding, and so fixed terminal reward, and a fixed
+rate of feather degradation, to make the problem tractable.  The new
+technique of \citet{houston99:model} allows us to remove these
+restrictions and to investigate the evolution of optimal annual
+routines for migratory birds in a more general manner.
+
+Feathers are constantly exposed to degrading agents, such as UV-B
+radiation \citep{bergman82:larus}, keratin-digesting bacteria
+\citep{burtt99:baci} and mechanical abrasion and wear
+\citep{bergman82:larus,bonser95:melanin,merilae00:wear,butler04:tba}.
+Unlike bones, feathers lack the capability of self-repair. Hence moult,
+the regular replacement of feathers, has evolved into a major event in
+avian life histories. Moult is costly in terms of energy
+\citep{lustick70:energ,lindstroem93:energ,murphy96:energ} and time
+\citep{jenni94:moult} and may be in conflict with other activities
+such as reproduction and migration
+\citep{nilsson96:cost,hemborg98:costs}. Long-distance avian migrants
+often make use of highly productive, but short, high latitude summers
+for reproduction.  However, during the short summers time has also to
+be found for the preparations for migration, and moult has to be fitted
+into the routine as well.
+
+A great deal of variation exists in moulting patterns in relation to
+migration \citep{stresemann66:mauser, ginn83:moult, jenni94:moult,
+  leu02:stopover, rohwer05:east_west_neotr}: flight feather
+replacement may be undertaken in the summer immediately after
+breeding, after arrival in the wintering quarters or there may even be
+two complete moults every year, as in the Willow Warbler
+\textit{Phylloscopus trochilus}
+\citep{prys-jones91:biannual,underhill92:willow_warbl}. This broad
+scheme of evolutionary solutions hides large amounts of finer temporal
+and spatial inter- and intra-specific variations in moult-migration
+patterns.  Migrants on their tropical wintering quarters may, for
+instance, moult at the beginning or the end of their stay
+\citep{salewski04:tba}. The Great Reed Warbler \textit{Acrocephalus
+  arundinaceus} stops over in the savanna belt in West Africa for a
+rapid moult before migration is resumed for destinations further south
+\citep{hedenstroem93:ghana}.  The River Warbler \textit{Locustella
+  fluviatilis} is unusual in that it moults variable numbers of outer
+primaries twice a year; birds leave their breeding grounds with worn
+feathers, moult a few outer primaries in Sudan and then all primaries,
+including the recently renewed outer primaries, on their wintering
+grounds \citep{pearson83:moult_warbl}. Savi's warbler has a similarly
+complex routine \citep{neto06:savi}. \citet{leu02:stopover} suggest
+that moult during migration in Neotropical migrants may be more common
+than previously assumed.
+
+Among many waterfowl, such as geese and ducks, after breeding there is
+often a so-called moult migration to areas where moult takes place
+before onset of migration to the winter grounds
+\citep{piersma87:popul_turnov,piersma88:moult_cycle}. Typically, these
+moult-migrations are not on the way to the winter destinations, but
+may rather be in the opposite direction and so extend the annual
+migration distance significantly \citep[see][]{kjellen94:moult}.
+
+Arctic-breeding waders show complex inter- and intra specific
+relationships between the timing of breeding, moult and
+migration. As an example, in southern Alaskan populations of
+the dunlin \textit{Calidris alpina} breeding, moult and migrating are
+mutually exclusive, whereas in northern Alaska and eastern Siberia
+dunlin overlap moult with egg incubation and chick attendance
+\citep{holmes71:red_sandp, holmgren01:geogr_calid}. European
+populations moult after migration on their wintering grounds. Dunlins
+migrating along the coast of the Baltic overlap moult and migration
+\citep{holmgren93:dunlin}. Purple sandpipers \textit{Calidris
+  maritima} also show a complex pattern \citep{summers:sandpip}.
+
+
+It is still unclear what factors may account for this still far from
+fully documented variation in moult-migration patterns \citep[see][for
+an overview of the neotropic migration system]{leu02:stopover}.
+Observed patterns suggest migration distance and the seasonality of
+food supply as important causes. All short-distance migrants to
+temperate wintering grounds use the moult-after-breeding strategy.
+Among Palearctic migratory songbirds about half of the long distance
+migrants moult directly after breeding while the other half moult on
+the wintering grounds. In some cases the timing of moult is
+intermediate, such as in the Barred Warbler \textit{Sylvia nisoria}
+where the flight feather moult is split between summer and winter
+grounds \citep{hasselquist88:seasonal, lindstroem93:barred_warbl}.
+Also, depending on the population, the degree of moult suspension may
+vary a great deal \citep{swann79:suspen,
+  hedenstroem95:willow_warbl}. There is hence some correlation between
+migration distance and the timing and location of moult
+\citep{svensson99:phylo}. Whether Neotropical migrants moult on their
+breeding or wintering grounds apparently also depends on the relative
+food availability at these locations
+\citep{leu02:stopover}. \citet{leu02:stopover} show that a
+significantly larger proportion of Neotropical migrants moult on the
+breeding ground in eastern versus western North America. The western
+areas become dry and unproductive by the end of the breeding season
+and it may be impossible for the birds to find enough energy to both
+prepare for migration and replace feathers. Furthermore, habitat
+preferences might affect feather wear and thus moult schedules
+\citep{rohwer05:east_west_neotr}.  \citet{svensson99:phylo} suggested
+that the Willow Warbler's preference for open habitats on its
+wintering grounds might accelerate feather degradation through UV-B
+exposure and therefore force the birds to moult a second time before
+spring migration.
+
+Here we present a model which allows the systematic investigation of
+how various factors and their interaction affect optimal annual
+routines of avian migrants. In this paper we are mainly concerned with
+the large-scale patterns i.e.\ we investigate strategies of moult and
+migration but do not consider the fine details of these strategies.
+For example, although we are concerned with the location at which
+birds moult, we do not present results on the details of the timing of
+moult within a given area.
+
+
+
+\section{The model}
+\label{sec:model}
+
+We consider the behaviour of a female bird and all her female
+descendants over a period of many years. A year is divided into $T=52$
+weeks, where week $0$ is the middle of the winter in the northern
+hemisphere. At the start of each week (i.e.\ at times $t=0, 1, \dots,
+T-1$), the bird has available four classes of behavioural actions
+relating to (i) reproductive behaviour (ii) foraging intensity (iii)
+migration (iv) and moult of the primaries. It simultaneously performs
+one action from each class. The performance of an action in one class
+does not constrain the action performed in another class \emph{a
+  priori}. The action taken by the bird can depend on the time of the
+year and its state which is represented by five state variables:
+quality of its feathers $F$, experience $e$, ``family status'' $a$,
+energy reserves $r$ and location $l$. The action taken influences the
+bird's future state.
+
+
+\subsection{Feathers and moult}
+\label{sec:feathers-moult}
+
+We have chosen to model the moult of a bird's primary feathers rather
+than other feather groups for two reasons. First, primary moult
+extends over virtually the entire moult period and is usually taken as
+a reference for the process of moult in the other feather tracts
+\citep{jenni94:moult}. Hence, the moult of primaries is
+well-studied. Second, primaries are considered to be the feathers that
+have the strongest effect on flight ability \citep{jenni94:moult}. As
+a consequence of these points, modelling the moult of primaries may
+provide the most valuable (and testable) predictions.
+
+The feather quality variable $F$ can vary (in steps of $1/10$) between $0$
+and $1$, where $0$ means feathers are in very poor condition while $1$
+indicates newly moulted feathers.  We assume that the rate of abrasion
+of unmoulted feathers during a given week $t$ is proportional to the
+amount of energy spent during that week.  Decreasing feather quality
+decreases flight ability (see \ref{sec:feather-dynamic},
+eq.~\eqref{eq:flight_eff}) and so increases predation risk and energy
+expenditure (for the functions that we use, see
+equations~\eqref{eq:mortality} and \eqref{eq:U}).
+
+The above quality measure applies to unmoulted feathers, but we also
+need to represent the state of feathers that are regrowing during the
+process of moult. To do this we allow $F$ to also take negative
+integer values ($-m_{length} \le F \le -1$) to code that moult is in
+progress. Here $m_{length}$ represents the minimum duration of moult
+(see \ref{sec:feather-dynamic} for details).  Starting moult results
+in an instantaneous change in the feathers' state at the beginning of
+the week to $F = -m_{length}$.  The state of feathers then tends to
+increase stochastically (\ref{sec:feather-dynamic},
+eq.~\eqref{eq:moulting}) until $F_{t} = -1$ when the bird will
+deterministically have completely new feathers at the start of the
+next week, i.e.\ $F_{t+1} = 1$. Since feathers are renewing gradually
+during moult we assume that the flight ability of a moulting bird
+increases as moult progresses (see \ref{sec:feather-dynamic},
+eq.~(\ref{eq:flight_eff})).  The synthesis of new flight feathers
+during moult requires an amount of energy, $\Delta_m(F)$, per week \citep[see
+\ref{App:energy} \eqref{eq:delta_m}]{lustick70:energ,lindstroem93:energ}.
+
+
+
+\subsection{Locations}
+\label{sec:location}
+
+We consider that the birds can use several distinct locations labelled
+by $l$ ($l = 0 \dots l_{max}$), where location 0 is considered as the
+most northern location while $l_{max}$ is the southernmost
+one. Locations are assumed to be linearly arranged so that a bird can
+only migrate from location $l$ to location $l+1$ or $l-1$. In the
+implementation of the model all parameters can depend explicitly on
+the location but in the paper, to simplify notation, we mark this
+dependence only for those parameters that were set to different values
+at different locations.
+
+The exact amount of the food available in week $t$ at location $l$,
+$\gf(t,l)$, depends on the environmental food supply on a given
+location $l$ and the competition between birds for this food (see
+\ref{sec:food-exper-reserv} for details).  The environmental food
+supply, $\Gf(t,l)$, varies sinusoidally over the year in a given
+location $l$. Its yearly average is given by $A_{food}(l)$ while its
+maximal deviation from the average is denoted by $\epsilon(l)$. The
+food supply in a given location is $A_{food}(l) - \epsilon(l)$ at time
+$t = 0$ and is $A_{food}(l) + \epsilon(l)$ at time $t = 26$. Locations
+can differ in both $A_{food}$ and $\epsilon$. If $\epsilon(l) > 0$ we
+consider location $l$ as being north of the equator while $\epsilon(l)
+< 0$ indicates that location $l$ is south of the equator. Note we assume
+that years are identical i.e.\ $A_{food}(l)$ and $\epsilon(l)$ are the
+same for all years in a given location so that we do not consider
+randomly fluctuating environments here.
+
+\subsection{Energy intake}
+\label{sec:energy-intake}
+
+The bird's energy intake in a given location depends on its foraging
+intensity $u$, the availability of food in that location $\gf(l,t)$,
+and the bird's experience $e$.  At the beginning of each week the bird
+adopts a foraging intensity, $u$ ($0 \le u \le 1$), and forages with
+this intensity throughout that week. Intensity $1$ means that the bird
+gains the maximal possible gross energetic intake while intensity $0$
+means that the bird does not feed at all.
+
+Because it is reasonable to assume that newly fledged birds forage
+with lower efficiency than adults we introduce the state variable
+experience, $e$. This variable takes integer values between 0
+(inexperienced) and $e_{max}$ (fully experienced). The newly fledged
+birds are all inexperienced ($e=0$) and experience tends to increase
+after fledgling until full maturation ($e=e_{max}$, details in
+\ref{sec:food-exper-reserv}).  Foraging efficiency depends on
+experience as follows. Let $\gamma$ be the gross energetic intake of a
+fully experienced individual. Then the gross energetic intake for a
+bird with experience $e$ (adopting the same foraging behaviour as a
+fully experienced one) is $\theta^{e_{max}-e}\gamma$ where $\theta <
+1$.
+
+Finally, we assume that the gross energy intake increases linearly
+with increasing foraging intensity. Then a bird which has experience
+$e$ and forages with intensity $u$ in week $t$ at location $l$ gains
+an amount of energy
+\begin{equation}
+  \label{eq:gamma}
+  \gammaf(u,e,l,t) = u \gf(l,t) \theta^{e_{max}-e}.
+\end{equation}
+
+\subsection{Reproduction}
+\label{sec:reproduction}
+
+The reproductive actions available to a bird depend on its ``family
+status'' which is indicated by the state variable $a$.  If the bird
+does not have a territory then $a=0$.  A non-territorial bird can
+either search for a new territory (hereafter labelled as `search') or
+alternatively `subsist'.  If the bird subsists then $a$ remains 0. If
+the bird searches for a new territory it obtains one with probability
+$p_{terr}(N_{terr},N_s)$. This probability depends on the number of free
+territories $N_{terr}$ and the number of searching birds $N_s$: many free
+territories and a low number of searching birds increases the probability
+of territory occupation (for details, see
+\ref{sec:prob-terr-find}). If a bird obtains a territory then $a$
+becomes 1, otherwise it remains 0. The bird pays an energetic cost
+$\Delta_{terr}$ for territory searching irrespective of whether it occupies
+one or not during the week. We also assume that the foraging benefits
+of holding a territory are balanced by the cost of territory defence
+i.e. maintaining a territory is neutral in terms of energy. A
+territory is, however, needed for reproduction.
+
+A territory owner ($a_t=1$) can either start a new brood (labelled as
+`start') or maintain the territory (`maintain').  If the bird starts a
+new brood, the bird's reserves are decreased by an amount of energy
+$\Delta_s$ and its family status will be $a_{t+1} = 2$ at the
+beginning of the next week. The family status of a maintaining bird
+does not change ($a_{t+1} = a_{t} = 1$).
+
+If the bird has a brood younger than the maximum allowed brood age ($2
+\le a < a_{max}$) it can either continue to care for it and so retain
+the brood (`care') or desert it (`desert').  The brood dies after the
+desertion and the bird will have no brood during the next week. If the
+bird continues to care, the family status increases by one ($a_{t+1} =
+a_t +1$) given that the bird is alive and can provide enough food,
+$\gamma_{brood}$, to prevent the starvation of brood members. For
+simplicity, we assume uniparental care. If the parent bird dies
+between $t$ and $t+1$ or is unable to achieve a gross energetic intake
+$\gamma_{brood}$ during this period then all brood members starve to
+death. In order to get gross intake $\gamma_{brood}$, the bird must
+forage with intensity at least equal to $u_{crit}(e,l,t)$ where
+$\gammaf(u_{crit},e,l,t) = \gamma_{brood}$.  Thus if
+$u_{crit}(e,l,t)>1$ the bird is forced to desert the brood since brood
+members will starve even if the mother forages with maximum intensity,
+$u=1$. If $u_{crit}(e,l,t)<1$ and the parent bird forages with
+intensity $u$, where $u_{crit}(e,l,t)\le u \le 1$, then the nestlings
+survive and the parent bird receives a gross energy intake of
+$\gammaf(u,e,l,t) - \gamma_{brood}$.
+
+If the brood reaches the maximum brood age ($a=a_{max}$) and the bird
+still cares during the week then it abandons the brood (`abandon') at
+the end of the week. The nestlings become independent at this time.
+Their experience is then $e=0$. We assume that their reserves are
+$r=0.5$ and their feathers are in top quality, $F = 1$. A bird who
+deserts or abandons its brood during week $t$ retains its territory,
+but cannot start a new brood before week $t+1$ i.e.\ $a_{t+1} = 1$.
+For simplicity, and because we are mainly interested in moult and
+migration, we do not optimise over brood size. Instead the number of
+female young at abandonment $n_{brood}$ is a parameter of our model.
+Note, however, that the modelled birds can still control their
+reproductive effort per year by varying their number of breeding
+attempts.
+
+
+\subsection{Energy reserves}
+
+The bird's energy reserves, $r$, vary (in steps of $1/12$) between
+$r=0$ and the bird's maximal storage capacity $r=1$. If energy
+reserves reach zero the bird dies of starvation. Energy reserves
+change as a consequence of foraging and the metabolic expenditure of
+the actions taken. First, we consider the cases where the bird does not
+have a territory i.e.\ $a=0$. Suppose that the bird subsists and
+forages with intensity $u$ during week $t$ at location $l$ and has
+feather quality $F$ at $t$.  Its reserves at the start of the next
+week $t+1$ are then given by the random variable $r_{subsist}$, where
+\begin{equation}
+  r_{subsist} = r+\gammaf(u,e,l,t) - C_{subsist} + R.
+  \label{eq:rdelay}
+\end{equation}
+Here $R$ is a random variable with zero mean representing the
+stochasticity in metabolic expenditure. The distribution of this
+random variable is specified in \ref{sec:stochasticity}. $C_{subsist}$
+is the energetic expenditure of a subsisting bird (see
+equation~\eqref{eq:c_delay}). This expenditure depends on the bird's
+reserves, its foraging intensity and the quality of its feathers (for
+further details see \ref{App:energy}). If it searches for a territory
+its reserves at the start of week $t+1$ are given by
+\begin{equation}
+  r_{search} = r+\gammaf(u,e,l,t)-C_{subsist} - \Delta_{terr} + R.
+  \label{eq:rsearch}
+\end{equation}
+If a bird has found a territory then $a=1$.  We assume that
+maintaining a territory does not have any energetic consequence for
+the bird, i.e.\ $r_{maintain} = r_{subsist}$.
+
+The dynamics of reserves for a bird starting a new brood (now with
+territory, $a=1$) are similar:
+\begin{equation}
+  r_{start} = r+\gammaf(u,e,l,t)-C_{subsist} - \Delta_s + R.
+  \label{eq:rstart}
+\end{equation}
+Now suppose that the bird has a brood ($a \ge 2$) and continues to
+care for it. Then it must forage with intensity $u$, $u_{crit}(e,l,t)
+\le u \le 1$, in order to ensure the survival of its nestlings. Its
+reserves will then be
+\begin{equation}
+  r_{act} = r+\gammaf(u,e,l,t)-\gamma_{brood}- C_{subsist} + R,
+\label{eq:rcare}
+\end{equation}
+where $act$ is either `care' or `abandon' because the brood is assumed to
+become independent only at the end of the week. 
+
+\subsection{Migration}
+\label{sec:migration}
+
+Migration is instantaneous and happens at the beginning of the week.
+Birds make only one movement between sites. Let the bird
+start to migrate in state ($F,e,a,r,l$) and let its state after
+finishing migration be ($F_{mig},e_{mig},a_{mig},r_{mig},l_{mig}$). If
+the bird migrates north $l_{mig} = l-1$ given that $l > 0$ i.e.\ the
+bird is currently not on the northernmost location. Similarly, if the
+bird migrates south $l_{mig} = l+1$ given that it is not on the
+southernmost location ($l < l_{max}$). If a bird migrates it loses its
+brood and territory i.e.\ $a_{mig} = 0$. The bird's experience does
+not change during the instantaneous migratory trip ($e_{mig} = e$).
+The bird's reserves after migration are given by
+\begin{equation}
+  \label{eq:rmig}
+  r_{mig} = r - C_{mig} + R,
+\end{equation}
+where 
+\begin{equation}
+  \label{eq:Cmig}
+  C_{mig} = \frac{(1+0.1 r^2) c_m}{\Wf(F)},
+\end{equation}
+where $\Wf(F)$ is the effect of feather quality on flight efficiency
+and is given by equation \eqref{eq:flight_eff}.  The bird's feather
+quality after migration will be
+\begin{equation}
+  \label{eq:fmig}
+  F_{mig} = \left\{
+    \begin{array}{ll}
+      F - f_f C_{mig} & \mbox{if $F \ge 0$}\\
+      F  & \mbox{otherwise}
+    \end{array}\right .
+\end{equation}
+Here $C_{mig}$ is the energetic cost of migration (see above) and
+$f_f$ is a parameter scaling the effect of $C_{mig}$.
+
+The bird survives the migratory journey with probability
+\begin{equation}
+  \label{eq:smig}
+  s_{mig} =   1-\frac{(1+0.1 r^2) M_m}{\Wf(F)},
+\end{equation}
+where $M_m$ scales the migratory mortality. As can be seen from this
+equation we assume that migratory mortality increases with increasing
+reserves and decreasing feather quality for the same reasons that
+overall mortality changes with these variables (see below). 
+
+
+\subsection{Sources of mortality}
+\label{sec:source-mortality}
+
+The bird can die because of starvation or predation. We assume that
+predation risk is an accelerating function of foraging intensity (the
+higher the intensity, the less probable is the bird to detect an
+approaching predator), and body reserves \citep[the more impaired the
+bird's flight is and the more reserves it carries, the less likely
+that it can escape from an
+attack:][]{hedenstroem92:fligh,slagsvold96:disap,lind99:reduc}, and
+decreases as flight efficiency $\Wf(F)$ increases
+(eq.~\eqref{eq:flight_eff}).  The birds also suffer from a background
+mortality, $M_b$, which is independent of behaviour.  The probability
+of mortality per week which is unrelated to starvation is given by
+\begin{equation}
+\Mf(u,r,F) = M_b + \frac{M_f u^2 (1+0.1r^2)}{\Wf(F)},
+\label{eq:mortality}
+\end{equation}
+where $M_f$ is a parameter that scales the reserve-dependent predation
+hazard. Mortality acts during the week. Thus if a bird dies between
+$t$ and $t+1$, then any young that became independent at $t$ are not
+affected, but any young that are still dependent at $t$ (i.e.\ $a \le
+a_{max}$ at time $t$) die along with the parent bird.
+
+
+
+\subsection{Determination of the optimal policy}
+
+The best policy to adopt depends on the food availability in the
+environment. Food availability over the annual cycle is specified by
+the function $\gf(l,t)$. The best policy for a given $\gf$ does not
+simply maximise the lifetime number of young produced by a
+bird. This is because young produced at some times of year are more
+likely to survive, and hence have greater reproductive value, than
+young produced at other times of year. Instead fitness is maximised by
+maximising the long-term rate of growth of descendants
+\citep{metz92:fitness}. Equivalently fitness is maximised by
+maximising the expected number of descendants left far into the
+future. Using this principle the best policy for given $\gf$ can be
+found by dynamic programming back over successive years (and
+generations) until convergence
+\citep{mcnamara91:perron,houston99:model}. Details are given in
+\ref{App:B}
+
+Conversely, because there is density dependence, the policy adopted by
+population members determines the food availability. To calculate $\gf$
+from the policy we follow the population forward in time. In this
+procedure we start with an initial specification of numbers of
+individuals in each state. Given such a population distribution at the
+start of week $t$, a measure of competition for food is determined
+(\ref{sec:food-exper-reserv}). This then determines $\gf(l,t)$ for
+that week (\ref{sec:food-exper-reserv}), and determines the population
+distribution at the start of week $t+1$. This weekly updating is
+repeated until the food availability over the annual cycle converges
+so that it is the same at the same time of year in successive years.
+
+We find the policy that is the best given the food supply that is
+generated by a population following this same policy. We refer to this
+self-consistent best policy as the optimal policy, but it is in fact
+an evolutionarily stable strategy. To find the policy and
+corresponding food availability we iterate over $\gf$; we calculate the
+best policy for a given $\gf$, and then update $\gf$ to be the food
+availability generated when population members follow this policy
+\citep[cf.][]{houston88:SDP}.  This iterative procedure usually
+converges. % We indicate on the figures those exceptional cases where
+% population size oscillates or the best response is not unique. Note,
+% however, that the magnitude of the oscillation or the difference
+% between the best responses is small.  Therefore, we also include
+% these results.
+
+%TODO: about the simulation!
+
+% To study the actual behaviour of the modelled birds we also run
+% forward Monte Carlo simulations after determining the optimal
+% policy. In these simulations 10,000 birds follow the optimal
+% strategy. The initial state distribution of the birds is the state
+% distribution of newly fledged birds. In the simulation the birds use
+% the food supply generated under the evolutionarily stable (i.e.\
+% optimal) policy. Birds who have died are removed from the simulation
+% and the descendants of the simulated birds are not entered into it.
+% Results presented are for simulated birds in the third year of life
+% and are based on birds that survive until the end of the third
+% year. By this time the influence of the initial state distribution at
+% birth has disappeared. 
+
+
+
+\section{Results}
+\label{sec:results}
+
+<<init-r>>=
+library(RMigone,lib.loc="~/lib/R/library")
+
+cut.n <- 150 ## only runs with more than this n is considered
+
+plot.behav <- function(bl) {
+  s.bird <- unique(bl$bird[bl$week==51]);
+  e.bird <- unique(bl$bird[bl$exper==2 & bl$week==0]);
+  n.loc <- length(unique(bl$loc));
+  par(mar=c(4.1,4.1,2.1,1.1))
+  layout(matrix(1:(n.loc),ncol=2,byrow=TRUE));
+  es.s <- (bl$event=="A") & (bl$bird %in% s.bird) & (bl$bird %in% e.bird);
+  m.denz <- max(tapply(bl$bird[es.s],bl$week[es.s],length),na.rm=TRUE)
+  for(l in 0:(n.loc-1)) {
+    es <- es.s & (bl$loc == l);
+    weeks <- sort(unique(bl$week[es]));
+    denz <- tapply(bl$bird[es],bl$week[es],length);
+    plot(0:58,0:58,type="n",ylim=c(0,m.denz),
+         xlab="week",ylab="density",bty="l");
+    lines(weeks,denz,lty=3);
+    y <- tapply(bl$action[es]=="S"|bl$action[es]=="K"|bl$action[es]=="A",
+                bl$week[es],sum)
+    if(!all(y<(m.denz*0.05))) lines(weeks,y,lwd=1,type="o");
+    y <- tapply(bl$moult1[es]!="N",bl$week[es], sum)
+    if(!all(y<(m.denz*0.05))) lines(weeks,y,lty=1,type="o",pch=2)
+    y <- tapply(regexpr("B$",bl$action[es])!=-1,bl$week[es],sum)
+    if(!all(y<(m.denz*0.05))) 
+      lines(weeks,y,lty=1,lwd=1,type="o",pch=3);
+    y <- tapply(regexpr("^No",bl$action[es])!=-1,bl$week[es],sum)
+    if(!all(y<(m.denz*0.05))) 
+      lines(weeks,y,lty=1,lwd=1,type="o",pch=4);
+    y <- tapply(regexpr("^So",bl$action[es])!=-1,bl$week[es],sum)
+    if(!all(y<(m.denz*0.05))) 
+      lines(weeks,y,lty=1,lwd=1,type="o",pch=5);
+    if(l==0) {
+      legend(60,m.denz,bty="n",lty=c(3,rep(1,5)),cex=0.8,
+             legend=c("total","breed","moult","terr.","north","south"),
+             xjust=1,pch=c(NA,1:5))
+    }
+    #title(paste("site",l+1));
+    mtext(paste("Site",l+1),side=3,at=0,line=0.5)
+  }
+  layout(1)
+}
+
+@ 
+
+First, we present two baseline cases. In both of these cases
+parameters are such that breeding occurs at site one (the most northerly
+location). We thus refer to this site as the breeding ground. In one
+case (the ``summer moult scenario'') the birds moult on site 1 after
+breeding. In the other case (the ``winter moult scenario'') birds
+moult on site 4. We chose these two cases as baselines because
+these are the two most common forms of moult-migration strategies
+reported \citep[e.g.][]{ginn83:moult,jenni94:moult}.  Second, we
+investigate how moult-migration strategies change if we transform the
+food distribution of one baseline case to that of the other. Third, we
+investigate the stability of the two forms of moult-migration
+strategies by altering several parameters of the model (one at a
+time).  Finally, we investigate the effects of the parameters that
+characterise the stopover sites.  It turns out that as a consequence
+of changing some parameters birds breed on more than one site. Because
+this behaviour is rather uncommon among real birds
+\citep[e.g.][]{jenni94:moult} we also constrain the birds to be able
+to breed only on site 1 by setting the number of available
+territories to zero on the other sites and repeat the above analyses.
+
+In all cases we consider birds to be able to migrate over four sites
+(site 1 is the northernmost, while site 4 is the southernmost).
+
+
+
+\subsection{Baseline cases}
+\label{sec:baseline-cases}
+
+<<baseline-summer>>=
+if(file.exists("bl_behav.Rdata")) {
+  load("bl_behav.Rdata");
+} else {
+  bl <- plot.sim1("../baseline/wb_summer-moult/baseline-sim",y=20,)
+  save(bl,file="bl_behav.Rdata")
+}
+postscript(file="bl_behav.eps",onefile=FALSE,horizontal=FALSE,
+           width=7,height=6)
+plot.behav(bl)
+dev.off()
+bl.apd <- O.apd("../baseline/wb_summer-moult/baseline-sim")
+bl.papd <- proc.apd(bl.apd)
+@ 
+
+<<baseline-winter>>=
+if(file.exists("bl_w_behav.Rdata")) {
+  load("bl_w_behav.Rdata");
+} else {
+  bl.w <- plot.sim1("../baseline/wb_winter-moult/w_baseline-sim",y=20,)
+  save(bl.w,file="bl_w_behav.Rdata")
+}
+postscript(file="bl_w_behav.eps",onefile=FALSE,horizontal=FALSE,
+           width=7,height=6)
+plot.behav(bl.w)
+dev.off()
+bl.w.apd <- O.apd("../baseline/wb_winter-moult/w_baseline-sim")
+bl.w.papd <- proc.apd(bl.w.apd)
+@ 
+
+<<baseline-food>>=
+sor <- function(i,b0,bn,n=20) {
+  i*((bn-b0)/n)+b0
+}
+postscript(file="food_dist.eps",onefile=FALSE,horizontal=FALSE,width=7,
+           height=6)
+layout(matrix(1:4,ncol=2,byrow=TRUE))
+par(mar=c(4.1,4.1,2.1,1))
+plot.food(A=sor(0:10,1.6,-0.3,10),e=sor(0:10,1.25,2.35,10),
+          type="l",col=1,bty="l", lty=c(1,rep(3,9),2),
+          ylim=c(0,2.8),ylab="Amount of food")
+mtext("Site 1",side=3,at=0,line=0.5)
+plot.food(A=c(1.25,1.2),e=c(0.7,0.3),type="l",col=1,bty="l",
+          ylim=c(0,2.8),ylab="Amount of food")
+mtext("Site 2",side=3,at=0,line=0.5)
+plot.food(A=c(0.8,1.25),e=c(0,-0.25),type="l",col=1,bty="l",
+          ylim=c(0,2.8),ylab="Amount of food")
+mtext("Site 3",side=3,at=0,line=0.5)
+plot.food(A=c(1.4,-0.25),e=c(-0.3,-2.85),type="l",col=1,bty="l",
+          ylim=c(0,2.8),ylab="Amount of food")
+mtext("Site 4",side=3,at=0,line=0.5)
+layout(1)
+dev.off()
+
+@ 
+
+The baseline parameters of the two scenarios differ only in the
+distribution of food on the sites (Table~\ref{tab:params},
+Figure~\ref{fig:food_dist}). Under the summer moult scenario the food
+on all but site 2 is less seasonal than under the winter moult
+scenario. On the other hand, under the winter moult scenario the food
+is very seasonal both on site 1 and site 4.
+
+
+Under the summer moult scenario the birds breed and moult on site 1
+(Figure~\ref{fig:bl_behave}). Some birds
+(\Sexpr{round(100*bl.papd$mo.M/bl.papd$n,1)}\% of individuals) migrate
+from site 1 while still moulting and finish moult on site 2. Birds
+spend some time on site 2 during migration while most of them leave
+site 3 immediately after one week. The start date of the spring
+migration is less variable than that of the autumn migration (SDs of
+start dates: \Sexpr{round(bl.papd$sd.w.no3,2)} weeks vs.\
+\Sexpr{round(bl.papd$sd.w.so0,2)} weeks), but the average time taken to
+complete the journey is slightly longer in spring than autumn
+(\Sexpr{round(bl.papd$jo.spr,1)} weeks vs.\
+\Sexpr{round(bl.papd$jo.aut,1)} weeks).
+
+Under the winter moult scenario most birds breed on site 1 and moult
+on site 4 (Figure~\ref{fig:bl_w_behave}). Some of the birds
+(\Sexpr{round(100*bl.w.papd$p.mo0,1)}\%), however, moult on site 1
+and many of them (\Sexpr{round(100*bl.w.papd$p.br3,1)}\%) breed on
+site 4. Even after intensive search in the parameter space we were
+unable to force the modelled birds to breed only on site 1 while
+moulting on site 4 just by changing the distribution of food. Birds
+spend several weeks on sites 2 and 3 during migration. The start
+of spring migration is also slightly less variable than the autumn one
+(\Sexpr{round(bl.w.papd$sd.w.no3,2)} weeks vs.\ 
+\Sexpr{round(bl.w.papd$sd.w.so0,2)} weeks), and again the duration of
+the spring journey is a little bit longer than that of the autumn
+journey (\Sexpr{round(bl.w.papd$jo.spr,1)} weeks vs.\ 
+\Sexpr{round(bl.w.papd$jo.aut,1)} weeks).
+
+
+
+Intensive computations reveal that strong seasonality both on site 1
+and 4 is a prerequisite for winter moult to occur. As a consequence
+of strong seasonality birds spend less time on the breeding
+(\Sexpr{round(bl.w.papd$sum.st,1)} weeks vs.\ 
+\Sexpr{round(bl.papd$sum.st,1)} weeks) as well as on the wintering
+ground (\Sexpr{round(bl.w.papd$win.st,1)} weeks vs.\ 
+\Sexpr{round(bl.papd$win.st,1)} weeks) under the winter moult scenario
+than under the summer one. The duration of the migratory journeys are
+also longer for the winter moult scenario than for the summer moult
+scenario (spring migration: \Sexpr{round(bl.w.papd$jo.spr,1)} vs.\ 
+\Sexpr{round(bl.papd$jo.spr,1)} weeks; autumn
+migration:\Sexpr{round(bl.w.papd$jo.aut,1)} vs.\ 
+\Sexpr{round(bl.papd$jo.aut,1)} weeks).
+
+<<baseline-nwb-summer,eval=FALSE>>=
+if(file.exists("nwb_bl_behav.Rdata")) {
+  load("nwb_bl_behav.Rdata");
+} else {
+  nwb.bl <- plot.sim1("../baseline/nwb_summer-moult/nwb_baseline-sim",y=20,)
+  save(nwb.bl,file="nwb_bl_behav.Rdata")
+}
+postscript(file="nwb_bl_behav.eps",onefile=FALSE,horizontal=FALSE,
+           width=7,height=6)
+plot.behav(nwb.bl)
+dev.off()
+nwb.bl.apd <- O.apd("../baseline/nwb_summer-moult/nwb_baseline-sim")
+nwb.bl.papd <- proc.apd(nwb.bl.apd)
+@ 
+
+<<baseline-nwb-winter,eval=FALSE>>=
+if(file.exists("nwb_bl_w_behav.Rdata")) {
+  load("nwb_bl_w_behav.Rdata");
+} else {
+  nwb.bl.w <- plot.sim1("../baseline/nwb_winter-moult/nwb_w_baseline-sim",y=20,)
+  save(nwb.bl.w,file="nwb_bl_w_behav.Rdata")
+}
+postscript(file="nwb_bl_w_behav.eps",onefile=FALSE,horizontal=FALSE,
+           width=7,height=6)
+plot.behav(nwb.bl.w)
+dev.off()
+nwb.bl.w.apd <- O.apd("../baseline/nwb_winter-moult/nwb_w_baseline-sim")
+nwb.bl.w.papd <- proc.apd(nwb.bl.w.apd)
+@ 
+
+Apart from the fact that the birds do not breed on sites other than
+site 1 the birds' behaviour is remarkably similar in the runs where
+they were only allowed to breed in site 1 to those in the
+unconstrained runs both under the summer and winter moult scenarios.
+Even the timing of events shows great similarity
+(Table~\ref{tab:comp-uncons-cons}).
+
+
+\subsection{Effects of food}
+\label{sec:effects-food-distr}
+
+
+To investigate the effects of food we have gradually transformed the
+food distribution on a site from its form under one scenario to that
+under the other scenario (see the dotted lines in
+Figure~\ref{fig:food_dist}a), first, on one site at a time, then on
+all sites simultaneously.  We have only varied food from one scenario
+towards the other because computations show that changing food away
+from the other scenario quickly leads to the extinction of the birds.
+
+<<load-wb-food>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_allowed/food_dist/"
+load(paste(work.dir,"papd.Rdata",sep=""));wb.food.papd <- papd
+wb.food.papd$mo.M <- wb.food.papd$mo.M/wb.food.papd$n
+wb.food.papd$mo.B <- wb.food.papd$mo.B/wb.food.papd$n
+m.papd <- wb.food.papd
+@ 
+
+
+On site 1 changing the food distribution from its summer moult form
+to its form under the winter moult scenario means more seasonal and
+less abundant food (Figure~\ref{fig:food_dist}a). As a consequence,
+birds increase their use of site 2 at the expense of site 1, for both
+breeding and moult (Figure~\ref{fig:wb_food}a,b,c). As food becomes
+more seasonal the frequency of moult-migration also increases
+(Table~\ref{tab:par_wb_food}). Changing food on site 2 changed the
+migration patterns, birds only migrate to site 2 and spend the
+winter there.  (Figure~\ref{fig:wb_food}d,e,f). The resulting
+shortening of the migratory journey increases the survival prospect of
+birds so they decrease the mean number of breeding attempts from
+\Sexpr{round(wb.food.papd$n.br[grep("./food_2-0-sim",wb.food.papd$file)],2)}
+to
+\Sexpr{round(wb.food.papd$n.br[grep("./food_2-15-sim",wb.food.papd$file)],2)}.
+Similarly, modifying the food distribution on site 3 shortens the
+migratory journey (site 3 becomes the primary wintering site), and
+decreases the number of breeding attempts
+(Figure~\ref{fig:wb_food}g,h,i). In these two cases, the pattern of
+moult does not change. Increasing the seasonality of food on site 4
+leads to more frequent biannual moult and breeding
+(Figure~\ref{fig:wb_food}j,k,l), using both site 1 and 4. Note
+that variation in food has not caused a transition from summer moult
+to winter moult in any of these cases. Constraining the birds'
+breeding possibility does not change their behaviour (not shown).
+
+The manipulation of the food from its winter moult scenario
+distribution to its summer moult one has a more uniform effect
+(Table~\ref{tab:par_wb_food},
+Figures~\ref{fig:food_dist},~\ref{fig:wb_w_food}). In almost all
+cases, under small deviations from the food distribution of the winter
+moult scenario birds start to use both site 1 and 4 for both breeding
+and moult (Figure~\ref{fig:wb_w_food}). A detailed analysis shows that
+in these cases the birds basically follow two separate life histories;
+one in which they moult on site 1 and breed on site 4 and one in which
+they moult on site 4 and breed on site 1. Note that, (i) in these
+cases the manipulation of food on one site cannot change the routine
+from winter moult to summer moult and (ii) the use of both endpoints
+of the migratory route for both breeding and moult occurs for small
+deviations from the baseline case.
+
+When birds are constrained in breeding, the effects of transforming
+food from the winter moult scenario are different to that under
+unconstrained breeding (Table~\ref{tab:par_wb_food}). Food
+manipulation on site 2 and four has no effect, while on site 3
+its effect can mainly be attributed to the high mortality. On site 1
+increasing food raises the proportion of birds moulting on site 1
+which in turn results in biannual moult in many birds.
+
+Varying the food distribution on all sites simultaneously leads to a
+swap from summer moult to winter moult
+(Figure~\ref{fig:wb_food}m,n,o).  Even in this case, however, the
+birds use both site 1 and four more or less equally for moult as
+well as breeding under most intermediate food distributions.  When
+food is varied on all sites at the same time and the birds are
+constrained there is a smooth transition from summer moult to winter
+moult.
+
+
+\subsection{The effects of parameters}
+\label{sec:effects-parameters}
+
+To investigate how stable the modelled birds' behaviour is under the
+baseline cases we systematically vary several parameters concerning
+general life history, cost of moult, feather quality and cost of
+migration (one at a time) (Table~\ref{tab:param_uncon}).  Under the
+summer moult scenario moult is only affected by the energetic cost of
+moult, $\kappa$ (Table~\ref{tab:par_wb_summ}); low cost increases the
+proportion of birds moulting on site 4 leading to biannual moult in
+many birds.  Many parameters influence the overlap between moult and
+either migration or breeding.  These effects can be traced back to the
+fact that increasing these parameters leads to decreasing survival
+which in turn increases the number of breeding attempts in a year.
+This means less time for moult and so the moult-breeding overlap
+increases.  Increasing the cost of migration (either the energetic
+cost, $C_{mig}$, or the mortality cost, $M_m$) decreases the number of
+sites used, resulting in less birds wintering on site 4.  The
+reaction of constrained birds to varying parameters (not shown) is
+almost identical to that of unconstrained birds.
+
+Under the winter moult scenario the changes in the parameters have
+more effects than under the summer moult scenario
+(Table~\ref{tab:par_wb_wint}). Varying parameters results in decreased
+journey duration in more cases, but in contrast to the summer moult
+scenario birds use site 1 less frequently.  This decrease in the
+proportion of birds spending the summer on site 1 naturally
+decreases the proportion of breeding birds there.  Moult and
+moult-migration are affected only by the energetic cost of moult, and
+parameters describing the effect of feather abrasion ($\alpha$, $f_f$,
+$m_A$).  When the cost of moult is low birds use site 1 for moult
+and site 4 for breeding, which is just the opposite to that found
+under the baseline case. Low cost of moult again results in many birds
+migrating while moulting. When the effect of feather quality on flight
+ability is very non-linear (small $\alpha$) birds use both site 1
+and four for moult. As $\alpha$ increases, birds prefer site 4 for
+moult rather than site 1. When abrasion rate ($f_f$) is low many
+birds skip moult in some years. As a result, increasing abrasion rate
+leads to an increasing proportion of birds moulting. If $m_A$ is high
+(i.e.\ worn feathers do not decrease flight efficiency strongly) many
+birds skip moult in some years.  Because moult and breeding usually
+occur on different sites separated in time by many weeks the frequency
+of moult-breeding overlap is very low.  More interestingly, the
+frequency of moult-migration is also very low (except in the case of
+very low moult cost).
+
+When birds are constrained under the winter moult scenario, changing
+the parameters has less effects than under the unconstrained runs
+(Table~\ref{tab:par_wb_wint}). Moult is affected only by the energetic
+cost of moult.
+
+Under both the summer and winter moult scenarios if high migration
+costs force the birds to shorten their migratory journey they
+eliminate the endpoint of the migratory route at which less food can be
+obtained; site 4 under the summer moult scenario and site 1 under
+the winter moult scenario (Table~\ref{tab:par_wb_summ} and
+\ref{tab:par_wb_wint}).
+
+
+\subsection{Conditions on stopover sites}
+\label{sec:cond-stop-sites}
+
+We have investigated the effects of stopover conditions on the birds'
+behaviour by varying parameters in Table~\ref{tab:param_uncon} on
+either site 2 or site 3 under the two scenarios.
+
+Under the summer moult scenario the effects of changes on the two
+stopover sites are different in their consequences
+(Table~\ref{tab:SO_wb_sum}).  Changes on site 2 influence moult,
+while changes on site 3 affect the number of sites used during the
+migratory journey.  Both low energetic cost of moult, $\kappa$, and
+small effect of very worn feathers ($m_A$ close to 1) on site 2
+result in many birds leaving site 1 (the breeding ground)
+immediately after breeding and moulting completely on site 2.  The
+proportion of birds migrating while moulting is also increased. On
+site 3 low reserve-dependent metabolic rate, low feather abrasion,
+high energetic cost of migration and high migratory predation risk
+lead to a shortened migratory journey i.e.\ many birds stop at site
+3 and do not migrate further to site 4
+(Table~\ref{tab:SO_wb_sum}).  Other parameters changed either on site
+2 or 3 do not influence moult-migration strategies. They do,
+however, significantly influence breeding; when conditions on either
+site 2 or 3 are worsened birds breed more times on site 1 to
+compensate for the lowered survival prospect on the stopover sites.
+This also results in a high proportion of overlap between moult and
+breeding. The constrained and unconstrained calculations under the
+summer moult scenario were very similar to each other.
+
+When the parameters on site 2 are varied under the winter moult
+scenario only the energetic cost of moult and migratory mortality
+affect the moult strategy (Table~\ref{tab:SO_wb_win}). When the cost
+of moult, $\kappa$, is low on site 2 many birds start to moult on
+site 1, instead of site 4, and finish moulting on site 2.
+Increasing $\kappa$ leads to decreasing moult on site 1 and two and
+increasing moult on site 4. Breeding changes with $\kappa$ in the
+opposite way. Many parameter changes on site 3 influence moult
+strategy (Table~\ref{tab:SO_wb_win}).  Their effect is similar in that
+increasing the cost of moult (either energetic or flight efficiency
+cost) means that many birds do not moult on site 4 to avoid
+finishing moult on the costly site 3 because of the unpredictable
+moult length.
+
+The constrained and unconstrained runs differ most when parameters
+were varied only on one site under the winter moult scenario. On site
+2 none of the parameters affected moult strategy
+(Table~\ref{tab:SO_nwb_win}). On site 3 only the energetic cost of
+moult, $\kappa$, has an effect (Table~\ref{tab:SO_nwb_win}). Low
+$\kappa$ results in many birds leaving site 4 while still moulting.
+Another effect of the alteration of moult cost is that the birds moult
+earlier as the cost increases to avoid migration during moult to the
+area where the cost is high.
+
+
+\section{Discussion}
+\label{sec:discussion}
+
+
+\subsection{The moult migration model}
+\label{sec:moral-moult-migr}
+
+Our optimal annual routine model suggests that the temporal and
+spatial distribution of food have the most important role in
+determining the large scale organisation of migratory birds' annual
+cycle. This is supported by the following. First, only large
+differences in the distribution of food are able to produce very
+distinct moult migration strategies. Summer moult (birds moult on the
+breeding ground immediately after breeding) occurs when food has a
+high peak in the summer but it is less seasonal elsewhere. On the
+other hand, if there is a short period of high food availability in
+summer and a strong winter peak at different locations (i.e.\ the food
+is very seasonal but in opposite phase on these areas) the birds breed
+during the summer then migrate to the wintering area and moult there;
+they follow the winter moult scenario.  Second, these two annual
+schedules are remarkably stable (especially if one considers the cases
+of constrained breeding). Neither changes in single parameter values
+nor in the distribution of food in one location can force the modelled
+birds to switch from summer moult to winter moult or vice versa. Only
+changing the food simultaneously in all sites results in a transition
+from one scenario to the other.
+
+Several empirical findings suggest that variations in the seasonality
+of the food supply on both breeding and wintering grounds can drive
+the timing of flight feather moult with respect to migration.  First,
+winter moult only occurs among long distance migrants
+\citep{jenni94:moult}. It can be argued that only in this case can
+food on the breeding and wintering grounds be both strongly seasonal
+and out of phase with each other. According to our model this is
+necessary to force the birds to moult on the wintering
+grounds. Second, the differences in moult-migration strategies between
+Nearctic and Palearctic systems might also support our argument. In
+trans-Saharan migrants of the western Palearctic the moult of the
+flight feathers is very variable with respect to autumn migration.  In
+contrast, Neotropical migrants typically moult their flight feathers
+in the autumn on the breeding grounds.
+\citet{rohwer05:east_west_neotr} suggest that the different character
+of the wintering habitats may explain these differences in moult
+schedules between Nearctic and Palearctic passerine migrants.  New
+World migrants typically winter in tropical forests, a very buffered,
+unseasonal environment \citep[the only nonseasonal annual schedule
+known to us is reported from this environment,][]{tallman97:amazon}.
+Palearctic migrants, on the other hand, mainly winter in scrub and
+acacia savannas of sub-Saharan Africa which are more exposed and so
+are probably more seasonal habitats than the winter habitats of
+Neotropical migrants
+\citep{moreau72:palear_afric,jones95:palear_afric}.  This argument
+might be further supported by the observation that several
+long-distance \textit{Phylloscopus} migrants that winter in Asian
+tropical forests also replace flight feathers in autumn before
+migration \citep{svensson99:phylo}.  Third, Neotropical migrants of
+the western US generally conform to a ``push-pull'' scenario
+\citep{rohwer05:east_west_neotr}. Exceedingly dry and unproductive
+conditions in late summer ``push'' the birds away and they are being
+``pulled'' towards the Mexican monsoon region or tropical Central and
+South America, where they then moult. This pattern conforms to our
+modelling results where a steep drop in resources in late summer
+selects for winter moult and good conditions on an intermediate site
+allow the birds to moult there. 
+
+Our model predicts the occurrence of biannual flight feather moult as
+a consequence of cheap moult (either because of richness of the food
+supply or the low energetic cost of moult) but not as a result of fast
+feather wear.  This contradicts the current concept of biannual moult
+which states that birds moult twice a year because of the fast
+abrasion of their feathers \citep{svensson99:phylo,weber05:resis}. One
+may argue, however, that even if fast abrasion would favour two moults
+in a year, the birds can only perform them if favourable conditions
+(e.g.\ rich food supply) allow.  Therefore, fast abrasion of feathers
+might be a consequence, instead of the cause of the biannual moult. If
+favourable condition allows the birds to moult twice, then feathers
+have to last only half a year instead of a whole year. Therefore the
+birds do not need to grow so durable feathers (thus decreasing the
+cost of moult further), which, in turn, leads to less resistance
+against wear.
+
+An interesting aspect of our results is the occurrence of breeding on
+the wintering area. Note that this does not necessarily mean that
+individual birds breed (or moult) on both endpoints in the same year;
+rather, as our computations show, the population is split in two more
+or less separated subpopulations in which birds follow different
+schedules.  According to our model, even a small alteration of food on
+the breeding or wintering areas under the winter moult scenario
+results in strategies under which it is optimal to breed (and moult)
+both on the summer and winter quarters.  Consequently, one may expect
+this phenomenon to be very common in natural populations of birds
+which have their moult on their winter quarters.  This behaviour of
+breeding both on the summer and winter grounds, however, occurs very
+rarely in reality.  To our knowledge this has only been reported in a
+Scandinavian population of dippers \textit{Cinclus cinclus} where
+evidence shows that some females breed in the spring while still in
+their winter quarters and then once again later in the summer after a
+northward migration \citep{vuorinen99:dipper}. Why is this so rare?
+One possibility that birds are exhausted by breeding twice a year. But
+this explanation does not exclude the possibility of two subpopulation
+of birds breeding and moulting only once in a year. A more plausible
+explanation could be the increased competition on the wintering areas
+\citep{cox68:comp_mig}.  The distribution of large landmasses on the
+Earth is highly skewed towards the northern hemisphere.  Because of
+this uneven distribution of land, large numbers of migratory birds
+from large breeding areas gather into much smaller wintering areas on
+the southern hemisphere in each year
+\citep{mills06:winter_range}. This is then hypothesised to result in a
+high level of competition for food which prevents breeding in
+wintering sites.  One may, however, argue that if competition for food
+prevents breeding, it might prevent moult too. On the other hand,
+birds might compete not just for food but for breeding sites
+too. Furthermore, resources on the wintering ground can vary widely
+both in space and time; consider, for example, the unpredictable onset
+of the rainy season.  The well-specialised local residents, which are,
+for instance, quickly able to get into reproductive condition, can
+cope with this variability and hence they can breed under these
+circumstances. The migrants, on the other hand, cannot.  They can,
+however, still moult, because moulting does not immobilise them as
+breeding would do, so they are able to track these rich but locally
+ephemeral resources. We conclude this paragraph with two
+remarks. First, more empirical investigations are needed to clarify
+why migrants breed only on one of their journey's endpoints. Second,
+without our flexible optimal annual routine approach, this question
+cannot be theoretically addressed.
+
+
+
+\subsection{Future directions}
+\label{sec:future-directions}
+
+
+\subsubsection{Migration research}
+\label{sec:migration-research}
+
+The annual routine model of migration that we have presented can be
+easily tailored to study the problems of migration research outlined
+in the Introduction.  Introducing sexes as state variables can allow
+us to investigate the factors leading to differential migration
+\citep{ketterson76:geogr_var,ketterson79:season_dark_juncos}.  Birds
+of different sexes can be allowed to follow different behaviour, e.g.\
+males can obtain territories while females can obtain territory
+holding males.  This would allow us to theoretically investigate the
+hypothesis that the need to obtain territories by males in spring
+drives males to winter closer to the breeding areas than females.
+Also, males and females can differ in their energetics, foraging
+efficiency, etc.\ making it possible to study the effects of body size
+and tolerance of winter starvation on the evolution of partial
+migration.  By choosing appropriate density functions for males and
+females one can investigate the role of competition for food on the
+winter quarters too. By retaining feather quality and moult in this two
+sex model the differences between the sexes in breeding moult overlap
+\citep{hemborg98:trade,hemborg98:sexua,Hemborg99,hemborg99:sexual} can
+also be studied. A crucial problem with the above approach is how to
+handle mate choice and parental care. As a first attempt one might
+ignore parental care by assuming uniparental care by the female. On
+the other hand, mate choice must be handled in some explicit way,
+because male quality (or the quality of the territory obtained by the
+male) can depend directly on the male's migratory behaviour (e.g.\ on
+time of arrival at the breeding ground). Introducing territories of
+different quality might be a way around this problem.
+
+Partial migration can be studied in a model with only two sites. One
+can start with identical sites and then change the sites gradually and
+record when part of the population starts to migrate. Members of the
+population can be characterised by additional state variables such as
+immune condition or foraging ability to investigate which class of the
+individuals is expected to start to migrate first. By changing the
+variables in which the sites differ one can assess the role of
+different factors (e.g.\ food, predation, parasites) in the initiation
+of migration. This kind of modelling work can also shed light on the
+evolutionary origin of migratory behaviour.
+
+It is widely hypothesised that competition and density-dependent
+effects play a significant role in the evolution of migratory
+behaviour \citep{cox68:comp_mig}. Much less is known, however, about
+how the different forms of competition (e.g.\ for food or territories)
+influence migration. Information about how density dependence acting
+through different factors like food, predation or disease can affect
+the evolution of migration is also limited. By applying different
+forms of density dependence it is possible to separate these effects
+with our model.
+
+A further possibility in studying the evolution of migration is that
+one can create a large array of sites which forms a fine gradient of
+slightly different neighbouring environments in the model. This
+environmental gradient can then be used to investigates the factors
+leading to leap-frog or chain migration \citep{bell05:mig_patt}.
+
+
+\subsubsection{General issues}
+\label{sec:general-issues}
+
+One of the main advantages of the optimal annual routine approach is
+the ability to unify the study of several organisational levels under
+the umbrella of natural selection. Since \citeauthor{darwin59:orig}'s
+seminal work \citeyearpar{darwin59:orig} it is widely accepted that
+all forms of life on the Earth are largely shaped by the process of
+natural selection, which mainly acts on the organisation level of
+individuals \citep{williams66:adapt}.  Consequently, the level of
+individuals should play a central role in the understanding of the
+biology of other levels of organisation, most notably, the
+organisation level of physiology (e.g.\ the neuroendocrine system) and
+the level of populations. In the case of the within-individual level,
+one should note that all physiological mechanisms are functioning for
+the ``benefits'' of the individual that contains them
+\citep{williams66:adapt}. In the case of populations, all behaviours
+of a population (e.g. birth or death rate) emerge from its members'
+behaviour which is shaped by natural selection. Therefore we argue
+that a new conceptual tool which is based on the level of individuals
+but allows the easy connection between the different organisation
+levels may help to understand the properties and processes of both the
+organisation levels within an individual and the level of populations.
+We propose that the technique for finding optimal annual routines used
+here \citep{mcnamara98:migra,houston99:model,barta06:moult} may serve
+as such an important conceptual tool. On the one hand, this technique
+is based on the theory of state-dependent dynamic models, which is
+nowadays widely used to find optimal individual behaviour.
+Consequently, the technique describes the connection between
+within-individual entities (state variables) and optimised individual
+behaviour. On the other hand, the technique "automatically" provides
+the lifetime reproductive success of the modelled individuals because
+finding the optimal behaviour involves maximising the number of
+descendants left in the far future \citep{houston99:model}.  Therefore
+it might also be used to predict the behaviour of populations of
+optimally behaving individuals (especially if some form of density
+dependence is included).
+
+This approach offers several novel ways to study within-individual and
+population processes.  First, the technique can be used to study the
+possible attributes of a within-individual control system which is
+capable of producing optimal behaviour. The results of this kind of
+investigations might contribute to the development of a new,
+evolutionary understanding of the neuroendocrine system.  Second, a
+new class of ecological models can be developed in which the
+population processes are analysed and predicted on the basis of
+individual behaviour shaped by natural selection. This might allow us
+to predict the effects of sudden environmental changes on population
+trends.  Currently, we are using the annual routine model of
+moult-migration presented here to predict the effects of food shortage
+on sites along the migratory route (Fer\'o et al., in prep.). Third,
+investigations under the previous two points can be joined to study
+whether state variables respond more readily to environmental changes
+than population processes do, and so whether the monitoring of the
+state of individuals (e.g.\ body condition, health status, levels of
+hormones and parasite load) in populations might provide an effective,
+non-invasive tool for predicting population trends and indicating
+impending disasters in conservation biology
+\citep{hill95:ornam_envir_healt, piersma04:migrat_sentin}.
+
+
+\newpage 
+
+\section{Acknowledgements}
+\label{sec:acknowledgements}
+%$
+We are grateful to P.\ Bednekoff, D.M.\ Buehler and T.\ Piersma for
+their helpful comments on a previous version. ZB was supported by a
+Marie Curie Fellowship of the European Community programme ``Improving
+Human Research Potential and the Socio-economic Knowledge Base'',
+contract number HPMF-CT-2001-01150. JMM acknowledges support of the
+Leverhulme Trust. TPW was supported by the Swedish Natural Research
+Council. The collaboration between Bristol and Lund was supported by a
+Royal Society Joint Project Grant. The study was supported by OTKA
+Grants (T046661, NF 61143) and a Marie Curie European Reintegration
+Grant (contract no. 005065).
+
+
+
+\newpage
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{Appendix \Alph{section}}
+
+\section{State variables and their dynamics}
+\label{App:A}
+
+\setcounter{equation}{0}
+\renewcommand{\theequation}{A.\arabic{equation}}
+
+The bird's state is given by five state variables: quality of its
+feathers $F$, experience $e$, family status $a$, energy reserves
+$r$ and location $l$.
+
+
+\subsection{Feathers and moult}
+\label{sec:feather-dynamic}
+
+The feather quality variable can vary (in steps of $1/10$) between $0$
+(very poor) and $1$ (newly moulted).  $F$ can also take negative
+integer values ($-m_{length} \le F \le -1$) to signal that
+moult is in progress.
+
+Feathers (given that they are not moulted, $F \ge 0$) deteriorate by
+an amount proportional to the energy expenditure $C$. We assume
+\begin{equation}
+  F_{t+1} = F_{t} -f_{f} C
+  \label{eq:Pdelay}
+\end{equation}
+where $f_f$ is a parameter describing the effects of energy expenditure
+$C$ on feather abrasion. This energy expenditure is the energy
+expenditure of a subsisting bird $C_{subsist}$ (see
+eq.~(\ref{eq:c_delay})) plus any additional energy expenditure
+required by the given action e.g.\ $\Delta_s$ for starting a new
+brood. The mapping of $F_{t+1}$ onto the finite grid used is explained
+in \ref{sec:stochasticity}.
+
+If the bird is moulting with $F_{t} \le -2$ at the beginning of week
+$t$ then:
+\begin{equation}
+  F_{t+1} = \left\{
+    \begin{array}{ll}
+      F_{t} + 1 & \mbox{with probability $1-\nu$}\\
+      F_{t} & \mbox{with probability $\nu$}
+    \end{array} \right. .
+  \label{eq:moulting}
+\end{equation}
+Here $\nu$ represents some intrinsic stochasticity in moult length.
+If $F_{t} = -1$ the bird will deterministically have completely new
+feathers at the start of the next week i.e.\ $F_{t+1} = 1$.
+
+If the bird is not moulting its feathers (i.e.\ $F \ge 0$) it can
+choose between starting or not starting to moult. Starting moult
+results in an instantaneous change in the feathers' state at the
+beginning of week $t$, i.e.\ $F_{t} = -m_{length}$.  Then $F_{t+1}$
+will be given by equation (\ref{eq:moulting}).
+
+To take the effect of feather quality on flight ability into account
+we introduce the following function
+\begin{equation}
+  \label{eq:flight_eff}
+  \Wf(F) = \left\{
+  \begin{array}{ll}
+    m_{A} + F^{\alpha} (1-m_{A}) & \mbox{if $F \ge 0$}\\ 
+    m_{A} + \left(\frac{F+m_{length}}{m_{length}}\right)
+    ^{\alpha} (1-m_{A}) & \mbox{if $F \le -1$}
+  \end{array}\right. .
+\end{equation}
+$\Wf(F)$ measures the flight ability of a bird with feather quality
+$F$ compared to the flight ability of a bird with newly moulted
+feathers ($F=1$) for which $\Wf(1) = 1$. Decreasing feather quality
+decreases flight ability
+\citep{chai97:hummi,chai99:maxim,hedenstroem03:flyin,williams03:moult}
+and $\Wf(F) = 0$ means that the bird is unable to fly. $\alpha$
+describes the effects of feather quality and $m_{A}$ characterises the
+flight ability of a bird with feathers in very poor condition (i.e. $F
+= 0$).
+
+
+\subsection{Energy intake}
+\label{sec:food-exper-reserv}
+
+The environmental food supply at a given location $l$ is given by
+\begin{equation}
+  \label{eq:env_food}
+  \Gf(l,t) = A_{food}(l)+\epsilon(l) \sin\left(\pi\frac{t-13}{26}\right).
+\end{equation}
+
+The scaled population size at a given location $l$ (a measure of
+competition at that location) is the sum of individuals weighted by
+their foraging efficiency $\theta^{e_{max}-e}$ and foraging intensity:
+\begin{equation}
+  \label{eq:eff_pop}
+  n(l,t) = \sum N(F,e,a,r,l,t) \theta^{e_{max}-e} u,
+\end{equation}
+where $N(F,e,a,r,l,t)$ is the number of individuals in a given
+state at the beginning of week $t$ (the summation runs over all
+combinations of states).
+
+The available food depends on the environmental supply and on the
+scaled population size $n(t)$. We take
+\begin{equation}
+  \label{eq:dens_food}
+  \gf(l,t) = \Gf(l,t) \exp\left\{-D \left(\frac{n(l,t)}{N_0} -
+  1\right)\right\} + Y.
+\end{equation}
+$D$ is a measure of the strength of the density dependence and $N_{0}$
+scales the population size. Here $Y$ is a random variable with zero
+mean representing the environmental stochasticity in available
+food. In the present model $Y = (B-E/2)\omega$, where the random
+variable $B$ has a $Bin(E,1/2)$ distribution. 
+
+If a bird has experience $e$ at the start of week $t$ it retains this
+experience at the beginning of the next week with probability $1-p_e$
+or improves to
+\begin{equation}
+e'=\min(e_{max},e+1) 
+\label{eq:e'}
+\end{equation}
+with probability $p_e$.  It follows from the above
+formulation that a fully experienced bird remains fully experienced.
+
+\subsection{Probability of territory occupation}
+\label{sec:prob-terr-find}
+
+We assume that the probability of occupying a territory increases with
+the number of free territories $N_t$, and it decreases with the number
+of searching birds $N_s$. The number of free territories is given by
+\begin{equation}
+  \label{eq:Nt}
+  N_t = N_{tot} - \sum_{a>0} N(F,e,a,r,l,t),
+\end{equation}
+where $N_{tot}$ is a parameter of the model giving the total number of
+territories.  The number of searching birds is
+\begin{equation}
+  \label{eq:Ns}
+  N_s = \sum_{a=0} N(F,e,a,r,l,t) * \pi_{a=0}^{search}.
+\end{equation}
+$N(F,e,a,r,l,t)$ gives the number of birds in a given state.
+$\pi_{a=0}^{search}$ gives the probability that an individual without
+territory ($a=0$) will search for a territory (see below).  The
+probability of territory occupation is then 
+\begin{equation}
+  \label{eq:pter}
+  p_{ter}(N_t,N_s) = k \frac{1}{\beta + \frac{N_s}{N_t}},
+\end{equation}
+where $k$ and $\beta$ are model parameters. 
+
+\subsection{Dynamics of energy reserves}
+\label{App:energy}
+
+The metabolic cost for a subsisting bird foraging with intensity $u$,
+and having feather quality $F$ and reserves $r$ is
+\begin{equation}
+  \label{eq:c_delay}
+  \cf_{subsist}(u,F,r) = c_b + c_r r^2 + \Delta_{m}(F) + \Uf(u,F, r) ,
+\end{equation}
+where the first two terms represent the reserve (and so mass)
+dependent basic metabolic cost \citep{aschoff70:bird_ener},
+$\Delta_{m}(F)$ represents the energetic cost of feather
+synthesis when the bird moults and $\Uf(u,F, r)$ is the
+energetic cost caused by foraging and the lowered flight ability.
+$\Delta_{m}(F)$ is given as follows:
+\begin{equation}
+  \label{eq:delta_m}
+  \Delta_{m}(F) = \left\{
+    \begin{array}{ll}
+      \kappa & \mbox{if $F \le -1$}\\
+      0 & \mbox{otherwise}
+    \end{array} \right . .
+\end{equation}
+
+In defining $\Uf(u,F,r)$ we consider the following.  The energetic
+cost of foraging should increase with foraging intensity, $u$, and
+body mass (and hence reserves $r$) because foraging usually involves
+movement. The energetic effects of these movements can, however, be
+very different for birds usually foraging on the ground (e.g.\
+starlings) as opposed to birds mainly collecting their food on the
+wing (e.g.\ swallows). It is clear that lowered flight ability should
+only affect that part of foraging cost which is caused by
+flight. Accordingly we take
+\begin{equation}
+  \label{eq:U}
+  \Uf(u,F,r) = u^2(1+0.1r^2)\left\{(1-p_F)c_u + p_F
+  \frac{c_f}{\Wf(F)}\right\}, 
+\end{equation}
+where $\Wf(F)$ is given by equation (\ref{eq:flight_eff}). Here $p_F$
+($0 \le p_F \le 1$) takes into account the relative importance of
+flight during foraging. For instance, small $p_F$ might be appropriate
+for a starling while $p_F \approx 1$ would be appropriate for a
+swallow.
+
+%\setcounter{section}{2}
+%\setcounter{subsection}{0}
+
+\section{Dynamic programming}
+\label{App:B}
+
+
+\subsection{Notation}
+\label{sec:notations}
+
+The best strategy for given food availability maximises the expected
+number of descendants left in a target year sufficiently far in the
+future \citep{mcnamara91:perron}. Let $\ff_n(F, e, a, r,l, t)$ denote
+the maximum expected number of descendants left at the end of the
+target year by an individual in state ($F, e, a, r,l$) at the
+beginning of week $t$, $n$ years before the target year.
+
+To simplify notation, we let $\Expect{}$ denote expectation (explained
+in \ref{sec:stochasticity}) and define
+$\ff_n^e(F_{t}, e, a, r, l, t, act)$ as
+\begin{equation}
+  \label{eq:Ve}
+  \begin{array}{rcl}
+  \ff_n^e(F_{t}, e, a, r, l, t,act) & = &  \sum p_Y \left\langle(1-p_e)\left[p_t
+      \Expect{\ff_n(F_{t+1},e,a',r_{act},l,t+1)}+ \right.\right.\\
+  & & \left.(1-p_t) \Expect{\ff_n(F_{t+1},e,a'',r_{act},l,t+1)} \right]+\\
+  & & p_e\left[p_t \Expect{\ff_n(F_{t+1},e',a',r_{act},l,t+1)}+ \right.\\
+  & & \left.\left.(1-p_t) \Expect{\ff_n(F_{t+1},e',a'',r_{act},l,t+1)}
+  \right]\right\rangle 
+  \end{array}
+\end{equation}
+where $F_{t+1}$ and $e'$ are given by equations
+(\ref{eq:Pdelay})-(\ref{eq:moulting}) and (\ref{eq:e'}), respectively.
+Summation is over all values of the environmental stochasticity in the
+available food, $Y$ and $p_Y$ specifies the distribution of $Y$ (see
+eq.~\eqref{eq:dens_food}).  Here $act$ can take `subsist', `search',
+`maintain', `start', `care' and `abandon', and $r_{act}$ is given by
+equations \eqref{eq:rdelay}-\eqref{eq:rcare}.  $a'$, $a''$ and $p_t$
+are defined as follows:
+
+\begin{tabular}{lll}
+  if $act$ is `subsist', & $a' = a'' = 0$, & $p_t = 1$;\\
+  if $act$ is `search', & $a' = 1$, $a'' = 0$, & $p_t = p_{ter}(N_t,N_s)$;\\
+  if $act$ is `maintain', & $a' = a'' = 1$, & $p_t = 1$;\\
+  if $act$ is `start', & $a' = a'' = 2$, & $p_t = 1$;\\
+  if $act$ is `keep', & $a' = a'' = a+1$ ($2 \le a < a_{max}$), & $p_t = 1$.\\
+  if $act$ is `abandon', & $a' = a'' = 1$, & $p_t = 1$.\\
+\end{tabular}
+
+
+\subsection{Stochasticity}
+\label{sec:stochasticity}
+
+The expectation $\mathsf{E}$ in equation \eqref{eq:Ve} is an average
+over the random variable $R$ in equations
+\eqref{eq:rdelay}-\eqref{eq:rcare} and in stochasticity in the change
+in feather qualities. The expectation is calculated as follows. The
+bird's energy reserves, $r$, lies in the range $0 \le r \le 1$ and are
+represented on a discrete grid with positions labelled 0, 1, \dots,
+$k_{max}$, where $k_{max} = 12$. The grid position $k$ ($0 \le k \le
+k_{max}$) corresponds to the reserves
+\begin{equation}
+  \label{eq:k}
+  r = \frac{1}{k_{max}} k.
+\end{equation}
+
+Let $k$ be a point of the grid with corresponding reserves $r$ given
+by equation \eqref{eq:k}. Suppose a bird with reserves $r$ takes
+action `act' at week $t$. Then, given that it survives to week $t+1$ its
+reserves at this time is $r_{act}$, where $r_{act}$ is given by
+one of the equations \eqref{eq:rdelay}-\eqref{eq:rcare}. Let $\hat{k}
+= k_{max} r_{act}$. In general this $\hat{k}$ will not be an
+integer, i.e.\ the reserves at week $t+1$ does not fall on our grid of
+reserves. Set $\hat{k}\_$ to be the greatest integer that is less than
+or equal to $\hat{k}$. Set $p_2 = \hat{k} - \hat{k}\_$ and set $p_1 =
+1 - p_2$. Set also
+\begin{equation}
+  \label{eq:pis}
+  \begin{array}{rcl}
+    \hat{p}_0 & = & \zeta p_1\\
+    \hat{p}_1 & = & (1-2\zeta) p_1 + \zeta p_2\\
+    \hat{p}_2 & = & \zeta p_1 + (1-2\zeta) p_2\\
+    \hat{p}_3 & = & \zeta p_2
+  \end{array} ,
+\end{equation}
+where $\zeta$ controls the variation in $R$. Then we can interpret
+the new reserves at $t+1$ as lying at grid point $\hat{k}_i$ with
+probability $\hat{p}_i$, where 
+\begin{equation}
+  \label{eq:3}
+  \begin{array}{rcl}
+    \hat{k}_0 & = & \max[0, \min(k_{max}, \hat{k}\_ - 1)]\\
+    \hat{k}_1 & = & \max[0, \min(k_{max}, \hat{k}\_)]\\
+    \hat{k}_2 & = & \max[0, \min(k_{max}, \hat{k}\_ + 1)]\\
+    \hat{k}_4 & = & \max[0, \min(k_{max}, \hat{k}\_ + 2)]
+  \end{array}. 
+\end{equation}
+
+Stochasticity in feather quality is dealt in a similar way, but the
+new feather quality at $t+1$ lies only at two grid points, $f_1$ and
+$f_2$, with probabilities $s_1$ and $s_2$. $f_i$ and $s_i$ are defined
+in a similar way to $\hat{k}_1$, $\hat{k}_2$, $p_1$ and $p_2$.
+
+The expectation is then calculated as:
+\begin{multline}
+  \label{eq:1}
+  \Expect{\ff_n(F_{t+1}, e, a_{act}, r_{act}, l, t+1)} = \\
+  \sum_{\hat{k}_i} \sum_{f_j} \hat{p}_i s_j
+  \ff_n(f_j,e,a_{act},\hat{k}_i,l,t+1) .
+\end{multline}
+
+
+\subsection{Dynamic programing equations}
+\label{sec:dynam-progr-equat}
+
+First, suppose a bird is not starting to moult and not migrating.  If
+the bird has no territory ($a = 0$) and subsists then
+its descendant number left in the far future depends on its foraging
+intensity $u$:
+\begin{equation}
+  H_{subsist}(u) = [1-\Mf(u,r,F)] \ff_n^e(F_{t}, e, a, r,l, t, subsist)
+\end{equation}
+where $\ff_n^e$ is given by equation~\eqref{eq:Ve} with
+$act=$``$subsist$'' and $r_{subsist}$ given by
+equation~\eqref{eq:rdelay}.  The maximum payoff given that the
+non-moulting bird subsists is
+\begin{equation}
+H_{subsist}^* = \max_{0\le u \le 1} H_{subsist}(u).
+\end{equation}
+
+For the actions ``search'', ``maintain'' and ``start'' $H_{search}^*$,
+$H_{maintain}$ and $H_{start}^*$ are similarly derived.
+
+When the bird currently cares for a brood ($1 < a < a_{max}$) it
+can either continue to care or desert. If it continues it must
+forage with intensity $u\ge u_{crit}(e,l,t)$ and its payoff is
+\begin{equation}
+  H_{care}(u) = [1-\Mf(u,r,F)]
+  \ff_n^e(F_{t}, e, a, r, l,t, care),
+\end{equation}
+where $r_{care}$ is given by equation (\ref{eq:rcare}).  When the bird
+is about to abandon a brood that is ready to fledge (i.e.\
+$a=a_{max}$) it does so at the end of the week. Therefore, during the
+week the bird has to care but at the end of the week its payoff is now
+increased by the total expected number of descendants left by its
+offspring into the far future i.e.\ by $n_{brood}\ff_n(1, 0, 0, 0.5,
+l, t)$ since $n_{brood}$ young become independent at the end of week
+$t$. Therefore,
+\begin{multline}
+  H_{abandon}(u) = [1-\Mf(u,r,F)] \times \\ [ \ff_n^e(F_{t}, e, a, r,
+  l,t, abandon) + n_{brood}\ff_n(1, 0, 0, 0.5, l, t+1)],
+\end{multline}
+where $r_{abandon}$ is given by equation (\ref{eq:rcare}). 
+
+The maximum number of descendants left in the far future by a caring
+and abandoning birds is then given by
+\begin{equation}
+  H_{act}^* = \max_{u_{crit}   \le u \le 1}H_{act}(u) 
+\end{equation}
+where $u_{crit}(e,l,t) \le 1$. If $u_{crit}>1$ we set $H_{act}^* =
+0$.
+
+Now we are in the position to present the maximum number of
+descendants left in the far future for a non-moulting non-migrating
+bird. We denote this quantity by $^{0}\ff_n(F,e,a,r,l,t)$. To
+determine this $^{0}\ff_n(F,e,a,r,l,t)$ we use the
+`errors-in-decision-making' approach of \citet{mcnamara97:errors}.
+
+For $r=0$ we have
+\begin{equation}
+  ^{0}\ff_n(F, e, a, r, l, t) = 0
+\end{equation}
+i.e.\ the bird has died.  If the bird has not died because of
+starvation ($r>0$) and it does not have a territory ($a=0$) let 
+\begin{equation}
+  \label{eq:Ha}
+  H_{a=0}^{max} = \max(H_{subsist}^*, H_{search}^*),
+\end{equation}
+\begin{equation}
+  \label{eq:prob_Ha}
+  \rho_{a=0}^{act} = Er\left(\frac{H_{act}^* -
+  H_{a=0}^{max}}{H_{a=0}^{max}}\right),
+\end{equation}
+and 
+\begin{equation}
+  \label{eq:pi}
+  \pi_{a=0}^{act} = \frac{\rho_{a=0}^{act}}{\sum_{A} \rho_{a=0}^{A}}
+\end{equation}
+where $act$ is either `subsist' or `search'.  $Er(x) = 1/(1+K/x)$, $K$
+ measuring the extent of error; the larger $K$ is, the smaller the
+ error is. $\pi_{a=0}^{act}$ gives the optimal policy with error for a
+ non territorial bird.
+
+Then we have
+\begin{equation}
+  ^{0}\ff_n(F, e, a, r, l, t) =
+  \pi_{a=0}^{subsist} H_{subsist}^* +
+  \pi_{a=0}^{search} H_{search}^*
+\end{equation}
+If the bird is alive ($r>0$) and occupies a territory ($a = 1$),
+$H_{a=1}^{max}$, $\pi_{a=1}^{act}$ and $^{0}\ff_n(F, e, a, r, l, t)$
+are similarly calculated with $act$ being `maintain' and `start'.
+
+
+On the other hand, if the bird is alive ($r>0$) and caring for young
+($1 < a \le a_{max}$) the equation is
+\begin{equation}
+  H_{1<a}^{max} = \max(H_{maintain}^*, H_{act}^*)
+\end{equation}
+because if the brood is deserted it dies and the bird is assumed to
+only maintain its territory during that week. Then $\pi_{1<a}^{act}$
+and $^{0}\ff_n(F, e, a, r, l, t)$ are calculated as previously, $act$
+being `maintain' and `care' or `abandon'. 
+
+After having determined the payoff for all states of a non-moulting
+non migrating bird we can give the maximum number of descendants left
+in the far future for a bird migrating north or south. Let the bird in
+state $(F,e,a,l,r)$ at the beginning of week $t$. Then if it does not
+migrate its pay off is
+\begin{equation}
+  \label{eq:noMig}
+  H_{stay}^* = ^{0}\ff_n(F, e, a, r, l, t).
+\end{equation}
+If it is migrate to north its payoff is
+\begin{equation}
+  \label{eq:migN}
+  H_{north}^* = \left \{
+  \begin{array}{ll}
+    s_{mig} \Expect{\,^{0}\ff_n(F_{mig}, e, 0, r_{mig}, l-1, t)} &
+    \mbox{if $l > 0$}\\ 
+    0 & \mbox{otherwise}.
+  \end{array} \right.
+\end{equation}
+Similarly, if it is migrate to south its payoff is
+\begin{equation}
+  \label{eq:migS}
+  H_{south}^* = \left \{
+  \begin{array}{ll}
+    s_{mig} \Expect{\,^{0}\ff_n(F_{mig}, e, 0, r_{mig}, l+1, t)} & \mbox{if $l
+      < l_{max}$}\\ 
+    0 & \mbox{otherwise}.
+  \end{array} \right.
+\end{equation}
+Here $r_{mig}$, $F_{mig}$ and $s_{mig}$ are given by equations
+\eqref{eq:rmig}, \eqref{eq:fmig} and \eqref{eq:smig}
+respectively. The expectation  $\mathsf{E}$ is calculated as in
+equation~\eqref{eq:1}. 
+
+Let 
+\begin{displaymath}
+  H_{mig}^{max} = \max \left(H_{stay}^*, H_{north}^*, H_{south}^* \right),
+\end{displaymath}
+\begin{displaymath}
+  \rho_{stay} = Er \left(\frac{H_{stay}^* -
+  H_{mig}^{max}}{H_{mig}^{max}} \right),
+\end{displaymath}
+and
+\begin{displaymath}
+  \rho_{north} = \left\{
+    \begin{array}{ll}
+      Er \left(\frac{H_{north}^* - H_{mig}^{max}}{H_{mig}^{max}} \right)
+      & \mbox{if $l > 0$}\\
+      0 & \mbox{otherwise}.
+    \end{array}\right .
+\end{displaymath}
+Define $\rho_{south}$ similarly.  Then the optimal policy with error
+is
+\begin{displaymath}
+  \pi_{mig}^{act} = \frac{\rho_{act}}{\sum_{A} \rho_{A}}
+\end{displaymath}
+where $act$ is either `stay', `north' or `south'. 
+Then the payoff of a bird is deciding about migration is 
+\begin{equation}
+  \label{eq:mig_pay}
+  ^{m}\ff_n(F, e, a, r, l, t)  = \sum_{act} \pi_{mig}^{act} H_{act}^*
+\end{equation}
+
+Now we consider the payoff for a bird who is about to moult its
+primaries. Because starting moult involves an instantaneous change in
+the feathers' state the payoff for a bird starting to moult its
+primaries is
+\begin{equation}
+  \label{eq:m_prim}
+  H_{moult}^* = \left\{
+    \begin{array}{ll}
+      \,^{m}\ff_n(-m_{length},e,a,r,l,t) & \mbox{if $F \ge 0$}\\
+      0 & \mbox{otherwise}.
+    \end{array} \right.
+\end{equation}
+Let
+\begin{displaymath}
+  H_{moult}^{max} = \max \left(\,^{m}\ff_n(F,e,a,r,l,t), H_{moult}^* \right),
+\end{displaymath}
+and
+\begin{displaymath}
+  \rho_{moult} = \left\{
+    \begin{array}{ll}
+      Er \left(\frac{H_{moult}^* - H_{mig}^{max}}{H_{mig}^{max}} \right)
+      & \mbox{if $F \ge 0$}\\
+      0 & \mbox{otherwise}.
+    \end{array}\right .
+\end{displaymath}
+For a non-moulting bird $\rho$ is similarly defined. Then the optimal
+moulting policy with error is
+\begin{displaymath}
+  \pi^{moult} = \frac{\rho_{moult}}{\sum_{A} \rho_{A}},
+\end{displaymath}
+where $A$ is either `moult' or `no-moult'.
+
+Now we can give the maximum number of offspring of a bird being in
+state $(F,e,a,r,l)$ at the beginning of week $t$:
+\begin{equation}
+  \label{eq:payoff}
+  \ff_n(F,e,a,r,l,t) = \pi^{moult} H_{moult}^* + (1-\pi^{moult})
+  \,^{m}\ff_n(F,e,a,r,l,t).
+\end{equation}
+
+
+
+To compute $\ff_n$ as well as the optimal decisions for all states,
+weeks and $n$ we need the terminal condition:
+\begin{equation}
+\begin{array}{cc}
+\ff_0(F, e, a, r,l, 52) = 1 & \mbox{for $r>0$},
+\end{array}
+\end{equation}
+and the wrap-around condition:
+\begin{equation}
+\ff_n(F, e, a, r, l, 52) = \Hat{\ff}_{n-1}(F, e, a, r, l, 0).
+\end{equation}
+Here $\Hat{\ff}_{n-1}(F,e,a,r,l,0)$ is a renormalisation of
+$\ff_{n-1}(F, e,a,r,l,0)$ so that 
+\begin{equation}
+  \label{eq:renorm}
+  \max[\Hat{\ff}_{n-1}(F, e, a, r,l,0)] = 1
+\end{equation}
+(maximisation runs over all states).  Computations are stopped when
+\begin{equation}
+\sum \left |\Hat{\ff}_{n+1}(F,e,a,r,l,0) -
+\Hat{\ff}_n(F,e,a,r,l,0) \right | < 0.001 
+\end{equation}
+i.e.\ when the optimal annual routine settles down (summation runs
+over all states). All computations were run using a 13 by 16 grid for
+the reserves and the qualities of feathers, respectively.
+
+
+
+\newpage
+
+
+\bibliography{/home/mazb/lib/bib_files/cikkek}
+
+
+\newpage
+
+
+\begin{longtable}{lccc}
+  \caption{\label{tab:params}The model's parameters and their baseline
+    values. Where two values are given the first one shows the value
+    for the summer moult scenario while the second one those of winter
+    moult scenario. All energetic value given as the proportion of the
+    bird's maximum fuel storage capacity.}\\
+  \hline \hline
+  Parameter & Symbol & \multicolumn{2}{c}{Value}\\
+  \hline \hline \endfirsthead
+  \caption{continued}\\
+  \hline \hline
+  Parameter & Symbol & \multicolumn{2}{c}{Value}\\
+  \hline \hline \endhead \hline \hline \endfoot 
+  The effect of energy expenditure on feather abrasion & $f_f$ &
+  \multicolumn{2}{c}{0.03} \\
+  Descriptor of feather quality effect & $\alpha$ &
+  \multicolumn{2}{c}{0.6} \\
+  The flight ability for very worn feathers & $m_A$ &
+  \multicolumn{2}{c}{0.2} \\
+  Stochasticity in moult length & $\nu$ &
+  \multicolumn{2}{c}{0.15} \\
+  Feather abrasion during migration & $f_m$ &
+  \multicolumn{2}{c}{0.05} \\
+  Energetic cost of migration & $C_{mig} $ &
+  \multicolumn{2}{c}{0.3} \\
+  Migratory mortality & $M_m$ &
+  \multicolumn{2}{c}{0.001} \\
+  Energetic cost of foraging on foot & $ c_u$ &
+  \multicolumn{2}{c}{0.2} \\
+  Energetic cost of foraging on flight & $c_f$ &
+  \multicolumn{2}{c}{0.75} \\
+  Relative importance of flight during foraging & $p_F$ &
+  \multicolumn{2}{c}{0.5} \\
+  Energetic cost of territory occupation & $\Delta_{terr}$ &
+  \multicolumn{2}{c}{1} \\
+  Energetic cost of starting a brood & $\Delta_s$ &
+  \multicolumn{2}{c}{1.1} \\
+  Food provided for brood & $\gamma_{brood}$ &
+  \multicolumn{2}{c}{1.1} \\
+  Energetic cost of moult & $\kappa$ &
+  \multicolumn{2}{c}{0.85} \\
+  Reserve dependent metabolic cost & $c_r$ &
+  \multicolumn{2}{c}{0.04} \\
+  Basic metabolic cost & $c_b$ &
+  \multicolumn{2}{c}{0.3} \\
+  Background mortality & $M_b$ &
+  \multicolumn{2}{c}{0.0005} \\
+  Reserve dependent predation hazard & $M_f$ &
+  \multicolumn{2}{c}{0.002} \\
+  Foraging efficiency of inexperienced bird ($e=0$) & $\theta$ &
+  \multicolumn{2}{c}{0.7} \\
+  Reference amount of food available on site 1 & $A_{food}(1)$ & 1.6 & -0.3\\
+  Reference amount of food available on site 2 & $A_{food}(2)$ & 1.25 & 1.2\\
+  Reference amount of food available on site 3 & $A_{food}(3)$ & 0.8 & 1.25\\
+  Reference amount of food available on site 4 & $A_{food}(4)$ & 1.4 & -0.25\\
+  Extent of seasonality of food on site 1 & $\epsilon(1)$ & 1.25 & 2.35\\
+  Extent of seasonality of food on site 2 & $\epsilon(2)$ & 0.7 & 0.3\\
+  Extent of seasonality of food on site 3 & $\epsilon(3)$ & 0 & -0.25\\
+  Extent of seasonality of food on site 4 & $\epsilon(4)$ & -0.3 & -2.85\\
+  Environmental stochasticity in available food & $\omega$ &
+  \multicolumn{2}{c}{0.01} \\
+  Parameter of the distribution of environmental stochasticity & $E$ &
+  \multicolumn{2}{c}{3} \\
+  Scaling factor of population size & $N_0$ &
+  \multicolumn{2}{c}{1000} \\
+  Strength of the density dependence & $D$ &
+  \multicolumn{2}{c}{0.1} \\
+  Probability of increasing experience & $p_e$ &
+  \multicolumn{2}{c}{0.025} \\
+  Total number of territories & $N_{tot}$ &
+  \multicolumn{2}{c}{$10^6$} \\
+  Parameter of the probability of territory occupation equation & $k$ &
+  \multicolumn{2}{c}{0.9} \\
+  Parameter of the probability of territory occupation equation & $\beta$ &
+  \multicolumn{2}{c}{2} \\
+  Minimal length of moult (in weeks) & $m_{length}$ &
+  \multicolumn{2}{c}{10} \\
+\end{longtable}
+
+
+
+
+
+
+<<comp-cons-uncons>>=
+p.cmp <- function(rv,cv,t.c=t.cmp)
+{
+  round(t.c[rv,cv],1)
+}
+nwb.bl.apd <- O.apd("../baseline/nwb_summer-moult/nwb_baseline-sim")
+nwb.bl.papd <- proc.apd(nwb.bl.apd)
+nwb.bl.w.apd <- O.apd("../baseline/nwb_winter-moult/nwb_w_baseline-sim")
+nwb.bl.w.papd <- proc.apd(nwb.bl.w.apd)
+
+p.b <- bl.papd[,order(names(bl.papd))]
+p.b.w <- bl.w.papd[,order(names(bl.w.papd))]
+p.b.nwb <- nwb.bl.papd[,order(names(nwb.bl.papd))]
+p.b.w.nwb <- nwb.bl.w.papd[,order(names(nwb.bl.w.papd))]
+t.cmp <- cbind(t(p.b),t(p.b.nwb),t(p.b.w),t(p.b.w.nwb))
+colnames(t.cmp) <- c("bl","nwb.bl","bl.w","nwb.bl.w")
+
+@ 
+
+\begin{table}[t!]
+  \caption{A comparison of the timing of different events in the unconstrained
+    and constrained baseline scenarios. Column headings: `S-UC' is summer moult,
+    unconstrained; `S-C' is summer moult, constrained; `W-UC' is
+    winter moult, unconstrained; `W-C' is winter moult,
+    constrained. All numbers are averages in weeks}  
+  \label{tab:comp-uncons-cons}
+  \centering
+  \begin{tabular}{lrrp{3ex}rr}
+    \hline\hline
+    Event & S-UC & S-C & & W-UC & W-C\\
+    \hline\hline
+    Start of breeding & \Sexpr{p.cmp("w.br0","bl")} &
+    \Sexpr{p.cmp("w.br0","nwb.bl")} & & \Sexpr{p.cmp("w.br0","bl.w")} &
+    \Sexpr{p.cmp("w.br0","nwb.bl.w")}\\
+    Start of moult & \Sexpr{p.cmp("w.mo0","bl")} &
+    \Sexpr{p.cmp("w.mo0","nwb.bl")} & & \Sexpr{p.cmp("w.mo3","bl.w")} &
+    \Sexpr{p.cmp("w.mo3","nwb.bl.w")}\\
+    Start of spring migr. & \Sexpr{p.cmp("w.no3","bl")} &
+    \Sexpr{p.cmp("w.no3","nwb.bl")} & & \Sexpr{p.cmp("w.no3","bl.w")} &
+    \Sexpr{p.cmp("w.no3","nwb.bl.w")}\\
+    Start of autumn migr. & \Sexpr{p.cmp("w.so0","bl")} &
+    \Sexpr{p.cmp("w.so0","nwb.bl")} & & \Sexpr{p.cmp("w.so0","bl.w")} &
+    \Sexpr{p.cmp("w.so0","nwb.bl.w")}\\
+    Duration of summer stay & \Sexpr{p.cmp("sum.st","bl")} &
+    \Sexpr{p.cmp("sum.st","nwb.bl")} & & \Sexpr{p.cmp("sum.st","bl.w")} &
+    \Sexpr{p.cmp("sum.st","nwb.bl.w")}\\
+    Duration of summer stay & \Sexpr{p.cmp("win.st","bl")} &
+    \Sexpr{p.cmp("win.st","nwb.bl")} & & \Sexpr{p.cmp("win.st","bl.w")} &
+    \Sexpr{p.cmp("win.st","nwb.bl.w")}\\
+    Length of spring migr. & \Sexpr{p.cmp("jo.spr","bl")} &
+    \Sexpr{p.cmp("jo.spr","nwb.bl")} & & \Sexpr{p.cmp("jo.spr","bl.w")} &
+    \Sexpr{p.cmp("jo.spr","nwb.bl.w")}\\
+    Length of autumn migr. & \Sexpr{p.cmp("jo.aut","bl")} &
+    \Sexpr{p.cmp("jo.aut","nwb.bl")} & & \Sexpr{p.cmp("jo.aut","bl.w")} &
+    \Sexpr{p.cmp("jo.aut","nwb.bl.w")}\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+
+<<load-wb-food>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_allowed/food_dist/"
+load(paste(work.dir,"papd.Rdata",sep=""));wb.food.papd <- papd
+wb.food.papd$mo.M <- wb.food.papd$mo.M/wb.food.papd$n
+wb.food.papd$mo.B <- wb.food.papd$mo.B/wb.food.papd$n
+m.papd <- wb.food.papd
+@ 
+
+
+\begin{table}[t!]
+  \caption{The effects of the  manipulations of food on the birds'
+    behaviour. (a) Taking the unconstrained summer moult scenario,
+    food is changed in the direction of the unconstrained winter moult
+    scenario (as illustrated on Figure~\ref{fig:food_dist}a). (b) Food
+    is changed from the unconstrained winter moult 
+    scenario in the direction of the unconstrained summer moult
+    scenario. (c) Food is changed from the constrained winter moult
+    scenario in the direction of the constrained summer moult
+    scenario. The signs indicate how the given value changed
+    with food (no sign means change less then 10\%, one sign signals
+    changes between 10\%  and 50\% and two signs show changes more
+    than 50\%; NA means not applicable). `Sites' marks where food was
+    changed. `Pr. of moult' shows the proportion of birds moulting on
+    site 1 or 4. `Moult overlap' gives the proportion of birds who
+    actively moult during migration (`Migr.') or breeding
+    (`Breed.'). `No. of breed.' shows the average number of breeding
+    attempts per bird on site 1 or 4. `Distribution' gives the
+    proportion of birds being at site 1 on week 26 (`Summ.') and on
+    site 4 on week 0 (`Wint.').  } 
+  \label{tab:par_wb_food}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Sites & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    \multicolumn{9}{l}{(a) \textbf{Unconstrained:} From summer to winter
+    moult scenario}\\ 
+    Site 1 \Sexpr{table.row(m.papd,"^..food_1",index=1:11)}
+    Site 2 \Sexpr{table.row(m.papd,"^..food_2",index=1:11)}
+    Site 3 \Sexpr{table.row(m.papd,"^..food_3",index=1:11)}
+    Site 4 \Sexpr{table.row(m.papd,"^..food_4",index=1:11)}
+    all \Sexpr{table.row(m.papd,"^..food_all",index=1:21)}
+    \hline
+    \multicolumn{9}{l}{(b) \textbf{Unconstrained:} From winter to summer
+    moult scenario}\\ 
+    Site 1 \Sexpr{table.row(m.papd,"^..w_food_1",index=1:11)}
+    Site 2 \Sexpr{table.row(m.papd,"^..w_food_2",index=1:11)}
+    Site 3 \Sexpr{table.row(m.papd,"^..w_food_3",index=1:11)}
+    Site 4 \Sexpr{table.row(m.papd,"^..w_food_4",index=1:11)}
+    \hline
+
+<<load-nwb-food>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_not_allowed/food_dist/"
+load(paste(work.dir,"papd.Rdata",sep=""));nwb.food.papd <- papd
+nwb.food.papd$mo.M <- nwb.food.papd$mo.M/nwb.food.papd$n
+nwb.food.papd$mo.B <- nwb.food.papd$mo.B/nwb.food.papd$n
+m.papd <- nwb.food.papd
+
+@ 
+    \hline
+    \multicolumn{9}{l}{(c) \textbf{Constrained:} From winter to summer
+    moult scenario}\\ 
+    Site 1 \Sexpr{table.row(m.papd,"^..nwb_w_food_1",index=1:11)}
+    Site 2 \Sexpr{table.row(m.papd,"^..nwb_w_food_2",index=1:11)}
+    Site 3 \Sexpr{table.row(m.papd,"^..nwb_w_food_3",index=1:11)}
+    Site 4 \Sexpr{table.row(m.papd,"^..nwb_w_food_4",index=1:11)}
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+
+
+
+\begin{table}[t!]
+  \caption{The manipulated parameters, and the range of
+    manipulation. For the baseline values of the parameters see
+    Table~\ref{tab:params}.} 
+  \label{tab:param_uncon}
+  \centering
+  \begin{tabular}{lcr}
+    \hline\hline
+    Parameter & Symbol & Range\\
+    \hline\hline
+    Reserve dependent metabolic cost & $c_r$ & 0 \dots 0.06\\
+    Background mortality & $M_b$ & 0 \dots 0.01\\
+    Reserve dependent predation hazard & $M_f$ & 0 \dots 0.01\\
+    Energetic cost of moult & $\kappa$ & 0.5 \dots 1.5\\
+    Descriptor of feather quality effect & $\alpha$ & 0.1 \dots 1\\
+    Effect of energy expenditure on feather abrasion & $f_f$ & 0.02
+    \dots 0.04\\
+    The flight ability for very worn feathers & $m_A$ & 0.1 \dots 0.5\\
+    Energetic cost of migration & $C_{mig}$ & 0.1 \dots 0.5\\
+    Feather abrasion during migration & $f_m$ & 0 \dots 0.1\\
+    Migratory mortality & $M_m$ & 0 \dots 0.1\\
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+
+<<load-wb-sum>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_allowed/summer_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));wb.sum.papd <- papd
+wb.sum.papd$mo.M <- wb.sum.papd$mo.M/wb.sum.papd$n
+wb.sum.papd$mo.B <- wb.sum.papd$mo.B/wb.sum.papd$n
+m.papd <- wb.sum.papd
+m.papd <- m.papd[regexpr("F_flight-0-",m.papd$file) == -1,]
+@ 
+
+\begin{table}[t!]
+  \caption{The effects of the parameter manipulations (see
+    Table~\ref{tab:param_uncon} for details) on the birds'
+    behaviour under the unconstrained summer moult scenario (see text
+    for details). For an explanation of headings and symbols see
+    Table~\ref{tab:par_wb_food}.} 
+  \label{tab:par_wb_summ}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Symbol & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    $c_r$ \Sexpr{table.row(m.papd,"C_mass")}
+    $M_b$ \Sexpr{table.row(m.papd,"P_base")}
+    $M_f$ \Sexpr{table.row(m.papd,"P_mass")}
+    $\kappa$ \Sexpr{table.row(m.papd,"C_moult")}
+    $\alpha$ \Sexpr{table.row(m.papd,"F_flight")}
+    $f_f$ \Sexpr{table.row(m.papd,"F_fora")}
+    $m_A$ \Sexpr{table.row(m.papd,"F_worn")}
+    $C_{mig}$ \Sexpr{table.row(m.papd,"M_energy")}
+    $f_m$ \Sexpr{table.row(m.papd,"M_feather")}
+    $M_m$ \Sexpr{table.row(m.papd,"M_preda")}
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+<<load-wb-win>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_allowed/winter_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));wb.win.papd <- papd
+wb.win.papd$mo.M <- wb.win.papd$mo.M/wb.win.papd$n
+wb.win.papd$mo.B <- wb.win.papd$mo.B/wb.win.papd$n
+m.papd <- wb.win.papd
+m.papd <- m.papd[regexpr("F_flight-0-",m.papd$file) == -1,]
+@ 
+
+\begin{table}[t!]
+  \caption{The effects of the parameter manipulations (see
+    Table~\ref{tab:param_uncon} for details) on the birds'
+    behaviour under the winter moult scenario (see text
+    for details). For an explanation of headings and symbols see
+    Table~\ref{tab:par_wb_food}.} 
+  \label{tab:par_wb_wint}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Symbol & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    \multicolumn{9}{l}{\textbf{Breeding unconstrained}}\\
+    $c_r$ \Sexpr{table.row(m.papd,"C_mass")}
+    $M_b$ \Sexpr{table.row(m.papd,"P_base")}
+    $M_f$ \Sexpr{table.row(m.papd,"P_mass")}
+    $\kappa$ \Sexpr{table.row(m.papd,"C_moult")}
+    $\alpha$ \Sexpr{table.row(m.papd,"F_flight")}
+    $f_f$ \Sexpr{table.row(m.papd,"F_fora")}
+    $m_A$ \Sexpr{table.row(m.papd,"F_worn")}
+    $C_{mig}$ \Sexpr{table.row(m.papd,"M_energy")}
+    $f_m$ \Sexpr{table.row(m.papd,"M_feather")}
+    $M_m$ \Sexpr{table.row(m.papd,"M_preda")}
+    \hline
+
+<<load-nwb-win>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_not_allowed/winter_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));nwb.win.papd <- papd
+nwb.win.papd$mo.M <- nwb.win.papd$mo.M/nwb.win.papd$n
+nwb.win.papd$mo.B <- nwb.win.papd$mo.B/nwb.win.papd$n
+m.papd <- nwb.win.papd
+m.papd <- m.papd[regexpr("F_flight-0-",m.papd$file) == -1,]
+
+@ 
+
+    \hline
+    \multicolumn{9}{l}{\textbf{Breeding constrained}}\\
+    $c_r$ \Sexpr{table.row(m.papd,"nwb_w_C_mass")}
+    $M_b$ \Sexpr{table.row(m.papd,"nwb_w_P_base")}
+    $M_f$ \Sexpr{table.row(m.papd,"nwb_w_P_mass")}
+    $\kappa$ \Sexpr{table.row(m.papd,"nwb_w_C_moult")}
+    $\alpha$ \Sexpr{table.row(m.papd,"nwb_w_F_flight")}
+    $f_f$ \Sexpr{table.row(m.papd,"nwb_w_F_fora")}
+    $m_A$ \Sexpr{table.row(m.papd,"nwb_w_F_worn")}
+    $C_{mig}$ \Sexpr{table.row(m.papd,"nwb_w_M_energy")}
+    $f_m$ \Sexpr{table.row(m.papd,"nwb_w_M_feather")}
+    $M_m$ \Sexpr{table.row(m.papd,"nwb_w_M_preda")}
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+<<load-nwb-win>>=
+work.dir <- "~/Projects/Migration/one_feather/res/stopover/summer_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));SO.sum.papd <- papd
+SO.sum.papd$mo.M <- SO.sum.papd$mo.M/SO.sum.papd$n
+SO.sum.papd$mo.B <- SO.sum.papd$mo.B/SO.sum.papd$n
+m.papd <- SO.sum.papd
+#m.papd <- m.papd[regexpr("F_flight-0-",m.papd$file) == -1,]
+
+@ 
+
+\begin{table}[t!]
+  \caption{The effects of when parameters are manipulated (see
+    Table~\ref{tab:param_uncon} for details) only on site
+    2 or site 3 under the unconstrained summer moult scenario
+    (see text for details) For an explanation of headings and symbols
+    see Table~\ref{tab:par_wb_food}.}  
+  \label{tab:SO_wb_sum}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Symbol & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    \multicolumn{9}{l}{Changes on site 2}\\
+    $c_r$ \Sexpr{table.row(m.papd,"^..SO2_C_mass",numbers=TRUE)}
+    $M_b$ \Sexpr{table.row(m.papd,"^..SO2_P_base",numbers=TRUE)}
+    $M_f$ \Sexpr{table.row(m.papd,"^..SO2_P_mass",numbers=TRUE)}
+    $\kappa$ \Sexpr{table.row(m.papd,"^..SO2_C_moult",numbers=TRUE)}
+    $\alpha$ \Sexpr{table.row(m.papd,"^..SO2_F_flight",numbers=TRUE)}
+    $f_f$ \Sexpr{table.row(m.papd,"^..SO2_F_fora",numbers=TRUE)}
+    $m_A$ \Sexpr{table.row(m.papd,"^..SO2_F_worn",numbers=TRUE)}
+    $C_{mig}$ \Sexpr{table.row(m.papd,"^..SO2_M_energy",numbers=TRUE)}
+    $f_m$ \Sexpr{table.row(m.papd,"^..SO2_M_feather",numbers=TRUE)}
+    $M_m$ \Sexpr{table.row(m.papd,"^..SO2_M_preda",numbers=TRUE)}
+    \hline
+    \multicolumn{9}{l}{Changes on site 3}\\
+    $c_r$ \Sexpr{table.row(m.papd,"^..SO3_C_mass",numbers=TRUE)}
+    $M_b$ \Sexpr{table.row(m.papd,"^..SO3_P_base",numbers=TRUE)}
+    $M_f$ \Sexpr{table.row(m.papd,"^..SO3_P_mass",numbers=TRUE)}
+    $\kappa$ \Sexpr{table.row(m.papd,"^..SO3_C_moult",numbers=TRUE)}
+    $\alpha$ \Sexpr{table.row(m.papd,"^..SO3_F_flight",numbers=TRUE)}
+    $f_f$ \Sexpr{table.row(m.papd,"^..SO3_F_fora",numbers=TRUE)}
+    $m_A$ \Sexpr{table.row(m.papd,"^..SO3_F_worn",numbers=TRUE)}
+    $C_{mig}$ \Sexpr{table.row(m.papd,"^..SO3_M_energy",numbers=TRUE)}
+    $f_m$ \Sexpr{table.row(m.papd,"^..SO3_M_feather",numbers=TRUE)}
+    $M_m$ \Sexpr{table.row(m.papd,"^..SO3_M_preda",numbers=TRUE)}
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+<<load-nwb-win,eval=FALSE>>=
+work.dir <- "~/Projects/Migration/one_feather/res/stopover/winter_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));SO.win.papd <- papd
+SO.win.papd$mo.M <- SO.win.papd$mo.M/SO.win.papd$n
+SO.win.papd$mo.B <- SO.win.papd$mo.B/SO.win.papd$n
+m.papd <- SO.win.papd
+#m.papd <- m.papd[regexpr("F_flight-0-",m.papd$file) == -1,]
+
+@ 
+
+\begin{table}[t!]
+  \caption{The effects of when parameters are manipulated (see
+    Table~\ref{tab:param_uncon} for details) only on site
+    2 or 3 under the unconstrained winter moult scenario (see
+    text for details). For an explanation of headings and symbols see
+    Table~\ref{tab:par_wb_food}.}   
+  \label{tab:SO_wb_win}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Symbol & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    \multicolumn{9}{l}{Changes on site 2}\\
+    $c_r$  &  &  &  &  &  &  &  &  \\
+    $M_b$  &  &  &  &  & $-$ & $+$ & $-$ &  \\
+    $M_f$  &  &  &  &  &  & $+$ &  &  \\
+    $\kappa$  & $--$ & ++  & $--$ &  & + & $--$ &  &  \\
+    $\alpha$  &  &  &  &  &  &  &  &  \\
+    $f_f$  &  &  &  &  &  &  & + &  \\
+    $m_A$  &  &  &  &  &  &  &  &  \\
+    $C_{mig}$  &  &  &  &  & $-$ & + & $-$ &  \\
+    $f_m$  &  &  &  &  &  & + &  &  \\
+    $M_m$  &  &  &  &  & $--$ & ++ & $--$ &  \\
+    \hline
+    \multicolumn{9}{l}{Changes on site 3}\\
+    $c_r$	 &	 &	 &	 &	 &	 &	 &	 &  \\
+    $M_b$	 &	 &	 &	 &	 &	 & +	 &	 &  \\
+    $M_f$	 & +	 &	 &	 &	 &	 & +	 &	 &  \\
+    $\kappa$	 & +	 &	 & $-$	 &	 &	 & ++	 &	 &  \\
+    $\alpha$	 &	 &	 &	 &	 &	 & +	 &	 &  \\
+    $f_f$	 & +	 &	 &	 &	 &	 & +	 & +	 &  \\
+    $m_A$	 & $-$	 &	 &	 &	 & $-$	 & $-$	 & $-$	 &  \\
+    $C_{mig}$	 & +	 &	 &	 &	 & $-$	 & +	 &	 &  \\
+    $f_m$	 &	 &	 &	 &	 &	 &	 &	 &  \\
+    $M_m$	 &	 &	 &	 &	 &	 & +	 &	 &  \\
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+
+@ 
+
+\begin{table}[t!]
+  \caption{The effects of when parameters are manipulated (see
+    Table~\ref{tab:param_uncon} for details) only on site
+    2 or 3 under the constrained winter moult scenario (see text for
+    details). For an explanation of headings and symbols see
+    Table~\ref{tab:par_wb_food}.}   
+  \label{tab:SO_nwb_win}
+  \centering
+  \begin{tabular}{ccccccccc}
+    \hline\hline
+    Symbol & \multicolumn{2}{c}{Pr. of moult}  & \multicolumn{2}{c}{Moult
+      overlap} &     \multicolumn{2}{c}{No. of breed.} &
+    \multicolumn{2}{c}{Distribution} \\
+    &  Site 1 & Site 4 & Migr.& Breed. & Site 1 & Site 4 & Summ. & Wint. \\
+    \hline\hline
+    \multicolumn{9}{l}{Changes on site 2}\\
+    $c_r$  & & & & & & NA & &  \\
+    $M_b$  & & & & & $--$ & NA & $--$ &  \\
+    $M_f$  & & & & & & NA & &  \\
+    $\kappa$  & & & & & & NA & & \\
+    $\alpha$  & & & & & & NA & & \\
+    $f_f$  & & & & & & NA & &  \\
+    $m_A$  & & & & & & NA & &  \\
+    $C_{mig}$  & & & & & $-$ & NA & $-$ & \\
+    $f_m$  & & & & & & NA &  &  \\
+    $M_m$  & & & & & $--$ & NA & $--$ &  \\
+    \hline
+    \multicolumn{9}{l}{Changes on site 3}\\
+    $c_r$  & & & & & & NA &  & \\
+    $M_b$  & & & & & & NA &  & \\
+    $M_f$  & & & & & $-$ & NA &  & \\
+    $\kappa$  & & $+$ & $-$ & & & NA &  & \\
+    $\alpha$  & & & & & $-$ & NA &  & \\
+    $f_f$  & & & & & & NA & $+$ & \\
+    $m_A$  & & & & & $+$ & NA &  & \\
+    $C_{mig}$  & & & & & $-$ & NA & $-$ & \\
+    $f_m$  & & & & & & NA &  & \\
+    $M_m$  & & & & & & NA &  & \\
+    \hline\hline
+  \end{tabular}
+\end{table}
+
+
+<<corr-times,eval=FALSE>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_not_allowed/summer_moult/"
+load(paste(work.dir,"papd.Rdata",sep=""));nwb.sum.papd <- papd
+nwb.sum.papd$mo.M <- nwb.sum.papd$mo.M/nwb.sum.papd$n
+nwb.sum.papd$mo.B <- nwb.sum.papd$mo.B/nwb.sum.papd$n
+
+wb.sum.papd <- wb.sum.papd[order(wb.sum.papd$file),]
+nwb.sum.papd <- nwb.sum.papd[order(nwb.sum.papd$file),]
+n1 <- wb.sum.papd$file
+n2 <- nwb.sum.papd$file
+n2 <- sub("nwb_","",n2)
+es <- n1 %in% n2
+v <- c("w.br0","w.mo0","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.sum <- sapply(v, function(i) {
+  cor.test(wb.sum.papd[es,i],nwb.sum.papd[,i])$estimate})
+
+wb.win.papd <- wb.win.papd[order(wb.win.papd$file),]
+nwb.win.papd <- nwb.win.papd[order(nwb.win.papd$file),]
+n1 <- wb.win.papd$file
+n2 <- nwb.win.papd$file
+n2 <- sub("nwb_","",n2)
+es <- n1 %in% n2
+v <- c("w.br0","w.mo3","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.win <- sapply(v, function(i) {
+  cor.test(wb.win.papd[es,i],nwb.win.papd[,i])$estimate})
+
+wb.food.papd <- wb.food.papd[order(wb.food.papd$file),]
+nwb.food.papd <- nwb.food.papd[order(nwb.food.papd$file),]
+n1 <- wb.food.papd$file
+n2 <- nwb.food.papd$file
+n2 <- sub("nwb_","",n2)
+es <- regexpr("w_",n1) > -1
+v <- c("w.br0","w.mo0","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.food <- sapply(v, function(i) {
+  cor.test(wb.food.papd[!es,i],nwb.food.papd[!es,i])$estimate})
+v <- c("w.br0","w.mo3","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.food.w <- sapply(v, function(i) {
+  cor.test(wb.food.papd[es,i],nwb.food.papd[es,i])$estimate})
+
+SO.sum.papd <- SO.sum.papd[regexpr("birtok",SO.sum.papd$file) == -1,]
+es.SO <- regexpr("SO2",SO.sum.papd$file) > -1
+es.nwb <- regexpr("nwb",SO.sum.papd$file) > -1
+v <- c("w.br0","w.mo0","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.SO2.sum <- sapply(v, function(i) {
+  cor.test(SO.sum.papd[es.SO & es.nwb,i],
+           SO.sum.papd[es.SO & !es.nwb,i])$estimate})
+es <- regexpr("P_base-0_05-sim",SO.sum.papd$file) == -1
+p.SO3.sum <- sapply(v, function(i) {
+  cor.test(SO.sum.papd[es & !es.SO & es.nwb,i],
+           SO.sum.papd[es & !es.SO & !es.nwb,i])$estimate})
+
+SO.win.papd <- SO.win.papd[regexpr("birtok",SO.win.papd$file) == -1,]
+es.SO <- regexpr("SO2",SO.win.papd$file) > -1
+es.nwb <- regexpr("nwb",SO.win.papd$file) > -1
+v <- c("w.br0","w.mo3","w.no3","w.so0","sum.st","win.st","jo.spr","jo.aut")
+p.SO2.win <- sapply(v, function(i) {
+  cor.test(SO.win.papd[es.SO & es.nwb,i],
+           SO.win.papd[es.SO & !es.nwb,i])$estimate})
+#es <- regexpr("P_base-0_05-sim",SO.win.papd$file) == -1
+p.SO3.win <- sapply(v, function(i) {
+  cor.test(SO.win.papd[!es.SO & es.nwb,i],
+           SO.win.papd[!es.SO & !es.nwb,i])$estimate})
+
+@ 
+
+
+
+
+
+
+
+\clearpage
+
+\newpage
+
+\section*{Figure legends}
+
+\FigL{fig:food_dist} The temporal distribution of food on the four
+sites (a: site 1; b: site 2; c: site 3; d: site 4). Solid lines:
+summer moult scenario; dashed lines: winter moult scenario. The dotted
+lines on (a) illustrate how food is changed in the food manipulation
+runs.
+
+\FigL{fig:bl_behave} The modelled birds' behaviour during a year on
+the four sites (a: site 1; b: site 2; c: site 3; d: site 4) under the
+summer moult scenario. The birds' breeding behaviour is not
+constrained (see text for details).  `Total': the total number of
+birds on the site; `breed': the number of birds breeding; `moult': the
+number of birds moulting; `terr.': the number of birds searching for a
+territory; `north': the number of birds leaving to migrate northward;
+`south': the number of birds leaving to migrate southward.
+
+\FigL{fig:bl_w_behave} The modelled birds' behaviour during a year on 
+the four sites (a: site 1; b: site 2; c: site 3; d: site 4) under the
+winter moult scenario. The birds' breeding behaviour is not
+constrained (see text for details). For detailed caption see
+Figure~\ref{fig:bl_behave}. 
+
+\FigL{fig:wb_food} The effects of transforming the distribution of
+food away from the summer moult scenario towards the winter moult
+scenario (for details see text); breeding is unconstrained. The first
+four rows of panels show the cases where food was transformed on site
+1, 2, 3 and 4 respectively. On the fifth row of panels food was varied
+on all sites simultaneously. The first column of panels gives the
+distribution of birds over the sites at week 0 (winter). The second
+column show the proportion of birds breeding while column three is the
+proportion of birds moulting over the year at the different sites.
+The proportion of birds is calculated as the proportion of all birds
+who survived the whole year.  The `Changes in food' symbolises the
+transition of food distribution from the \emph{summer} moult scenario
+towards the \emph{winter} moult scenario on a given site (as
+illustrated on Figure~\ref{fig:food_dist}a; the numbers are arbitary
+labels).  Number 0 is the baseline case shown in
+Figure~\ref{fig:bl_behave}.
+
+
+\FigL{fig:wb_w_food} The effects of transforming the distribution of
+food away from winter moult scenario towards the summer moult scenario
+(for details see text); breeding is unconstrained. The first column of
+panels gives the distribution of birds over the sites at week 0
+(winter). The second column shows the proportion of birds breeding
+while column three is the proportion of birds moulting over the year
+at the different sites.  The proportion of birds is calculated as the
+proportion of all birds who survived the whole year.  The `Changes in
+food' symbolises the transition of food distribution from the
+\emph{winter} moult scenario towards the \emph{summer} moult scenario
+on a given site (as illustrated on Figure~\ref{fig:food_dist}a; the
+numbers are arbitary labels).  Number 0 is the baseline case shown in
+Figure~\ref{fig:bl_behave}. The four rows of panels show the cases
+where food was transformed on site 1, 2, 3 and 4 respectively.
+
+
+
+
+%%%%% FIGURES %%%%%
+
+
+<<load-wb-food>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_allowed/food_dist/"
+load(paste(work.dir,"papd.Rdata",sep=""));wb.food.papd <- papd
+wb.food.papd$mo.M <- wb.food.papd$mo.M/wb.food.papd$n
+wb.food.papd$mo.B <- wb.food.papd$mo.B/wb.food.papd$n
+m.papd <- wb.food.papd
+m.papd <- m.papd[m.papd$n > cut.n,]
+
+postscript(file="wb_food.eps",onefile=FALSE,horizontal=FALSE,paper="a4")
+layout(matrix(1:15,ncol=3,byrow=TRUE))
+opar <- par(mar=c(4.1,4.1,2.1,0.5))
+f.case <- "^..food_1"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("a",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("b",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("c",side=3,at=0,line=0.5)
+
+f.case <- "^..food_2"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("d",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("e",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("f",side=3,at=0,line=0.5)
+
+f.case <- "^..food_3"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("g",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("h",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("i",side=3,at=0,line=0.5)
+
+f.case <- "^..food_4"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 4",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("j",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 4",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("k",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 4",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("l",side=3,at=0,line=0.5)
+
+f.case <- "^..food_all"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food everywhere",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("m",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food everywhere",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("n",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food everywhere",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("o",side=3,at=0,line=0.5)
+par(opar)
+
+layout(1)
+dev.off()
+
+@ 
+
+<<wb-w-food>>=
+
+postscript(file="wb_w_food.eps",onefile=FALSE,horizontal=FALSE,paper="a4")
+layout(matrix(1:15,ncol=3,byrow=TRUE))
+opar <- par(mar=c(4.1,4.1,2.1,0.5))
+f.case <- "^..w_food_1"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("a",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("b",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 1",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("c",side=3,at=0,line=0.5)
+
+f.case <- "^..w_food_2"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("d",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("e",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 2",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("f",side=3,at=0,line=0.5)
+
+f.case <- "^..w_food_3"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("g",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("h",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food on site 3",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("i",side=3,at=0,line=0.5)
+
+f.case <- "^..w_food_4"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",
+        xlab="Changes in food on site 4",
+        ylab="Proportion at site",bty="l",col=1)
+mtext("j",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",
+        xlab="Changes in food on site 4",
+        ylab="Proportion breeding",bty="l",col=1)
+mtext("k",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",
+        xlab="Changes in food on site 4",
+        ylab="Proportion moulting",bty="l",col=1)
+mtext("l",side=3,at=0,line=0.5)
+
+
+layout(1)
+dev.off()
+
+
+@ 
+
+
+<<load-nwb-food>>=
+work.dir <- "~/Projects/Migration/one_feather/res/wb_not_allowed/food_dist/"
+load(paste(work.dir,"papd.Rdata",sep=""));nwb.food.papd <- papd
+nwb.food.papd$mo.M <- nwb.food.papd$mo.M/nwb.food.papd$n
+nwb.food.papd$mo.B <- nwb.food.papd$mo.B/nwb.food.papd$n
+m.papd <- nwb.food.papd
+
+postscript(file="nwb_food.eps",onefile=FALSE,horizontal=FALSE,paper="a4")
+layout(matrix(1:15,ncol=3,byrow=TRUE))
+opar <- par(mar=c(4.1,4.1,2.1,0.5))
+f.case <- "^..nwb_food_1"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("a",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("b",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("c",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_food_2"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("d",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("e",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("f",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_food_3"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("g",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("h",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("i",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_food_4"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("j",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("k",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("l",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_food_all"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("m",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("n",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:20,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("o",side=3,at=0,line=0.5)
+par(opar)
+
+layout(1)
+dev.off()
+
+@ 
+
+<<nwb-w-food>>=
+
+postscript(file="nwb_w_food.eps",onefile=FALSE,horizontal=FALSE,paper="a4")
+layout(matrix(1:15,ncol=3,byrow=TRUE))
+opar <- par(mar=c(4.1,4.1,2.1,0.5))
+f.case <- "^..nwb_w_food_1"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("a",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("b",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("c",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_w_food_2"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("d",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("e",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("f",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_w_food_3"
+r <- ex.papd("^p.s[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("g",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("h",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:9,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("i",side=3,at=0,line=0.5)
+
+f.case <- "^..nwb_w_food_4"
+r <- ex.papd("^p.w[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("j",side=3,at=0,line=0.5)
+r <- ex.papd("^p.br[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("k",side=3,at=0,line=0.5)
+r <- ex.papd("^p.mo[0-3]",m.papd,f.case)
+r <- data.frame(v=r$v,r$r)
+r <- r[1:11,]
+matplot(r[,1],r[,-1],xlim=c(0,10),ylim=c(0,1),type="b",xlab="Changes in food",
+        ylab="Proportion",bty="l",col=1)
+mtext("l",side=3,at=0,line=0.5)
+
+
+layout(1)
+dev.off()
+
+
+@ 
+
+
+\begin{figure}[p]
+  \centering
+  \includegraphics{food_dist.eps}
+  \caption{ }
+  \label{fig:food_dist}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics{bl_behav.eps}
+  \caption{ }
+  \label{fig:bl_behave}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics{bl_w_behav.eps}
+  \caption{ }
+  \label{fig:bl_w_behave}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics{wb_food.eps}
+  \caption{ }
+  \label{fig:wb_food}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics{wb_w_food.eps}
+  \caption{ }
+  \label{fig:wb_w_food}
+\end{figure}
+
+
+
+\end{document}

@@ -15,3 +15,5 @@ R. Soc. B (2008) 363,
 This code is provided here in the hope that it might be useful for someone
 developing his/her own optimal annual routine model. Note, however, it is
 not longer maintained so it can work or might not.
+
+More details on running the model can be found in `source/README`.
